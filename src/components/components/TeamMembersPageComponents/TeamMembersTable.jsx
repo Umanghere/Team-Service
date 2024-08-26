@@ -159,7 +159,7 @@ const TeamMembersTable = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8000/employeesData")
+      .get("https://jsonserver-2xm2.onrender.com/employeesData")
       .then((response) => {
         setEmployeesData(response.data);
       })
@@ -180,7 +180,7 @@ const TeamMembersTable = () => {
   const handleSave = (updatedEmployee) => {
     axios
       .put(
-        `http://localhost:8000/employeesData/${updatedEmployee.id}`,
+        `https://jsonserver-2xm2.onrender.com/employeesData/${updatedEmployee.id}`,
         updatedEmployee
       )
       .then((response) => {
@@ -207,7 +207,7 @@ const TeamMembersTable = () => {
 
   const handleAddSave = (newEmployee) => {
     axios
-      .post("http://localhost:8000/employeesData", newEmployee)
+      .post("https://jsonserver-2xm2.onrender.com/employeesData", newEmployee)
       .then((response) => {
         setEmployeesData((prevData) => [...prevData, response.data]);
         setAddModalOpen(false);
@@ -229,7 +229,7 @@ const TeamMembersTable = () => {
   const handleUploadSave = (newData) => {
     newData.forEach((employee) => {
       axios
-        .post("http://localhost:8000/employeesData", employee)
+        .post("https://jsonserver-2xm2.onrender.com/employeesData", employee)
         .then((response) => {
           setEmployeesData((prevData) => [...prevData, response.data]);
         })

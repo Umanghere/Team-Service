@@ -9,7 +9,7 @@ const PieChart = () => {
 
   useEffect(() => {
     // Fetch employee data from the API
-    axios.get("http://localhost:8000/employeesData")
+    axios.get("https://jsonserver-2xm2.onrender.com/employeesData")
       .then((response) => {
         const employees = response.data;
         calculateSkillDistribution(employees);
