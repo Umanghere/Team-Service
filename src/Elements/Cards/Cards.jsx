@@ -28,7 +28,7 @@ const Cards = () => {
 
   const fetchEmployeesData = () => {
     axios
-      .get("http://localhost:8000/employeesData")
+      .get("https://jsonserver-2xm2.onrender.com/employeesData")
       .then((response) => {
         setEmployeesData(response.data);
         setTeamMemberCount(response.data.length);
@@ -46,7 +46,7 @@ const Cards = () => {
 
   const fetchTrainingData = () => {
     axios
-      .get("http://localhost:8000/trainingData")
+      .get("https://jsonserver-2xm2.onrender.com/trainingData")
       .then((response) => {
         calculateTrainingData(response.data);
       })

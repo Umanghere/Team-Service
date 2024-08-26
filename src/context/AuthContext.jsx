@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
     setUserRole(role); // Set user role on login
 
     try {
-      const response = await fetch("http://localhost:8000/users");
+      const response = await fetch("https://jsonserver-2xm2.onrender.com/users");
       const users = await response.json();
 
       // Find the user based on the email

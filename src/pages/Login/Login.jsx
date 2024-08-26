@@ -14,7 +14,7 @@ const Login = () => {
     event.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:8000/users');
+      const response = await fetch('https://jsonserver-2xm2.onrender.com//users');
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }

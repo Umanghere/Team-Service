@@ -160,7 +160,7 @@ export default function TrainingTable() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8000/trainingData")
+      .get("https://jsonserver-2xm2.onrender.com/trainingData")
       .then((response) => {
         setTrainingData(response.data);
       })
@@ -177,7 +177,7 @@ export default function TrainingTable() {
   const handleSave = (updatedEmployee) => {
     axios
       .put(
-        `http://localhost:8000/trainingData/${updatedEmployee.id}`,
+        `https://jsonserver-2xm2.onrender.com/trainingData/${updatedEmployee.id}`,
         updatedEmployee
       )
       .then((response) => {
@@ -204,7 +204,7 @@ export default function TrainingTable() {
 
   const handleAddSave = (newEmployee) => {
     axios
-      .post("http://localhost:8000/trainingData", newEmployee)
+      .post("https://jsonserver-2xm2.onrender.com/trainingData", newEmployee)
       .then((response) => {
         setTrainingData((prevData) => [...prevData, response.data]);
         setAddModalOpen(false);
