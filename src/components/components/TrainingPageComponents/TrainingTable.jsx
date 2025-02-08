@@ -160,7 +160,8 @@ export default function TrainingTable() {
 
   useEffect(() => {
     axios
-      .get("https://jsonserver-2xm2.onrender.com/trainingData")
+      // .get("https://jsonserver-2xm2.onrender.com/trainingData")
+      .get("http://localhost:8000/trainingData")
       .then((response) => {
         setTrainingData(response.data);
       })
@@ -177,7 +178,8 @@ export default function TrainingTable() {
   const handleSave = (updatedEmployee) => {
     axios
       .put(
-        `https://jsonserver-2xm2.onrender.com/trainingData/${updatedEmployee.id}`,
+        // `https://jsonserver-2xm2.onrender.com/trainingData/${updatedEmployee.id}`,
+        `http://localhost:8000/trainingData/${updatedEmployee.id}`,
         updatedEmployee
       )
       .then((response) => {

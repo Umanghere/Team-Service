@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -11,41 +10,44 @@ const Login = () => {
   const { login } = useAuth();
 
   const handleLogin = async (event) => {
-    event.preventDefault();
+  event.preventDefault();
+  setError(null);
 
-    try {
-      const response = await fetch('https://jsonserver-2xm2.onrender.com//users');
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+  try {
+    const response = await fetch('http://localhost:5000/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const users = await response.json();
-      const user = users.find((user) => user.email === email);
+    const data = await response.json();
 
-      if (!user) {
-        setError('Email not found');
-      } else if (user.password !== password) {
-        setError('Incorrect password');
-      } else {
-        login(email, user.role);
-        navigate('/Team-Service-UI/', { replace: true });
-      }
-    } catch (error) {
-      setError('Failed to login: ' + error.message);
+    if (!response.ok) {
+      throw new Error(data.message); // Display error messages properly
     }
-  };
+
+    login(data.email, data.role);
+    navigate('/Team-Service-UI/', { replace: true });
+
+  } catch (error) {
+    setError(error.message); // Set error state to display in UI
+  }
+};
+
+  
+  
 
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center bg-gray-800 h-screen">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-bold text-center mb-4">Login</h2>
 
         <form onSubmit={handleLogin} className="space-y-4">
-          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {error && <p className="text-red-500">{error}</p>}
           <div>
             <label htmlFor="email" className="block text-gray-700 font-bold mb-2">Email:</label>
             <input
-              type="text"
+              type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

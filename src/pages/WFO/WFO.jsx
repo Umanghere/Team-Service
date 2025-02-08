@@ -31,7 +31,8 @@ function CalendarTable() {
 
   useEffect(() => {
     axios
-      .get(`https://jsonserver-2xm2.onrender.com/users?email=${userEmail}`)
+      // .get(`https://jsonserver-2xm2.onrender.com/users?email=${userEmail}`)
+      .get(`http://localhost:8000/users?email=${userEmail}`)
       .then((response) => {
         const user = response.data[0];
         if (user) {
@@ -157,7 +158,8 @@ function CalendarTable() {
     ).padStart(2, "0")}`;
     axios
       .get(
-        `https://jsonserver-2xm2.onrender.com/employeeAttendances?name=${encodeURIComponent(
+        // `https://jsonserver-2xm2.onrender.com/employeeAttendances?name=${encodeURIComponent(
+        `http://localhost:8000/employeeAttendances?name=${encodeURIComponent(
           userNameAndId
         )}&month=${monthYear}`
       )
@@ -198,7 +200,8 @@ function CalendarTable() {
 
     axios
       .get(
-        `https://jsonserver-2xm2.onrender.com/employeeAttendances?name=${encodeURIComponent(
+        // `https://jsonserver-2xm2.onrender.com/employeeAttendances?name=${encodeURIComponent(
+        `http://localhost:8000/employeeAttendances?name=${encodeURIComponent(
           userNameAndId
         )}&month=${monthYear}`
       )
@@ -207,7 +210,8 @@ function CalendarTable() {
         if (existingData) {
           axios
             .put(
-              `https://jsonserver-2xm2.onrender.com/employeeAttendances/${existingData.id}`,
+              // `https://jsonserver-2xm2.onrender.com/employeeAttendances/${existingData.id}`,
+              `http://localhost:8000/employeeAttendances/${existingData.id}`,
               data
             )
             .then(() => {
@@ -226,7 +230,8 @@ function CalendarTable() {
             });
         } else {
           axios
-            .post("https://jsonserver-2xm2.onrender.com/employeeAttendances", data)
+          // .post("https://jsonserver-2xm2.onrender.com/employeeAttendances", data)
+            .post("http://localhost:8000/employeeAttendances", data)
             .then(() => {
               setSnackbarMessage(
                 `Attendance saved successfully for ${userNameAndId}`

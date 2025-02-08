@@ -9,7 +9,7 @@ const Navbar = () => {
   return (
     <header>
       <nav>
-        <div className='bg-gradient-to-r from-purple-700 to-orange-500 flex items-center justify-between py-6 px-8 text-xl text-white'>
+        <div className='bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-between py-6 px-8 text-xl text-white'>
           <div className="font-bold tracking-wides pl-10">Team Service</div>
           <div className='flex gap-5'>
             <ul className='flex gap-8 text-xl items-center'>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Modal, Box, Typography, TextField, Button, Grid } from '@mui/material';
 import PropTypes from 'prop-types';
@@ -8,20 +7,23 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: '90%',  // Use a percentage to ensure it fits within the viewport
-  maxWidth: 600,  // Set a maximum width for two columns
-  maxHeight: '90%',  // Ensure it does not exceed the viewport height
-  overflow: 'hidden',  // Remove the overflow auto to hide scrollbars
+  width: '90%', 
+  maxWidth: 600, 
+  maxHeight: '90%', 
+  overflow: 'hidden', 
   bgcolor: 'background.paper',
   boxShadow: 24,
   p: 4,
 };
 
 const EditModal = ({ open, handleClose, handleSave, employee }) => {
-  const [editEmployee, setEditEmployee] = useState({ ...employee });
+  const [editEmployee, setEditEmployee] = useState({});
 
+  // Ensure form is updated when employee changes
   useEffect(() => {
-    setEditEmployee({ ...employee });
+    if (employee) {
+      setEditEmployee({ ...employee });
+    }
   }, [employee]);
 
   const handleChange = (e) => {
@@ -38,52 +40,49 @@ const EditModal = ({ open, handleClose, handleSave, employee }) => {
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="edit-employee-modal"
-      aria-describedby="edit-employee-modal-description"
-    >
+    <Modal open={open} onClose={handleClose} aria-labelledby="edit-employee-modal">
       <Box sx={style} component="form" onSubmit={handleSubmit}>
-        <Typography id="edit-employee-modal" variant="h6" component="h2">
-          Edit Employee
-        </Typography>
+        <Typography id="edit-employee-modal" variant="h6">Edit Employee</Typography>
+        
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <TextField
               label="Name"
               name="Name"
-              value={editEmployee.Name}
+              value={editEmployee?.Name || ''}
               onChange={handleChange}
               fullWidth
               margin="normal"
+              required
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
               label="Grade"
               name="Grade"
-              value={editEmployee.Grade}
+              value={editEmployee?.Grade || ''}
               onChange={handleChange}
               fullWidth
               margin="normal"
+              required
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
               label="Designation"
               name="Designation"
-              value={editEmployee.Designation}
+              value={editEmployee?.Designation || ''}
               onChange={handleChange}
               fullWidth
               margin="normal"
+              required
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
               label="Project"
               name="Project"
-              value={editEmployee.Project}
+              value={editEmployee?.Project || ''}
               onChange={handleChange}
               fullWidth
               margin="normal"
@@ -93,7 +92,7 @@ const EditModal = ({ open, handleClose, handleSave, employee }) => {
             <TextField
               label="Skills"
               name="Skills"
-              value={editEmployee.Skills}
+              value={editEmployee?.Skills || ''}
               onChange={handleChange}
               fullWidth
               margin="normal"
@@ -103,24 +102,27 @@ const EditModal = ({ open, handleClose, handleSave, employee }) => {
             <TextField
               label="Location"
               name="Location"
-              value={editEmployee.Location}
+              value={editEmployee?.Location || ''}
               onChange={handleChange}
               fullWidth
               margin="normal"
+              required
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
-              label="ContactNo"
+              label="Contact Number"
               name="ContactNo"
-              value={editEmployee.ContactNo}
+              value={editEmployee?.ContactNo || ''}
               onChange={handleChange}
               fullWidth
               margin="normal"
+              required
             />
           </Grid>
         </Grid>
-        <Box sx={{ mt: 2, display: 'flex', gap:2, justifyContent:'right'}}>
+
+        <Box sx={{ mt: 2, display: 'flex', gap: 2, justifyContent: 'right' }}>
           <Button type="submit" variant="contained" color="primary">
             Save
           </Button>
@@ -137,7 +139,7 @@ EditModal.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
   handleSave: PropTypes.func.isRequired,
-  employee: PropTypes.object.isRequired,
+  employee: PropTypes.object,
 };
 
 export default EditModal;

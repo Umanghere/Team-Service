@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
@@ -159,7 +158,8 @@ const TeamMembersTable = () => {
 
   useEffect(() => {
     axios
-      .get("https://jsonserver-2xm2.onrender.com/employeesData")
+      // .get("https://jsonserver-2xm2.onrender.com/employeesData")
+      .get("http://localhost:5000/employeesData")
       .then((response) => {
         setEmployeesData(response.data);
       })
@@ -177,25 +177,28 @@ const TeamMembersTable = () => {
     setEditModalOpen(true);
   };
 
+  // console.log("Current User ID:", userEmpId);
+  // console.log("Selected Employee ID:", employee.EmpId);
+
+
   const handleSave = (updatedEmployee) => {
-    axios
-      .put(
-        `https://jsonserver-2xm2.onrender.com/employeesData/${updatedEmployee.id}`,
-        updatedEmployee
-      )
-      .then((response) => {
-        setEmployeesData((prevData) =>
-          prevData.map((emp) =>
-            emp.id === updatedEmployee.id ? response.data : emp
-          )
+    console.log("Updating Employee:", updatedEmployee); // Debugging
+
+    axios.put(`http://localhost:5000/employeesData/${updatedEmployee.id}`, updatedEmployee)
+      .then(response => {
+        console.log("Updated Employee Response:", response.data); // Debugging
+
+        setEmployeesData(prevData =>
+          prevData.map(emp => emp.id === updatedEmployee.id ? response.data : emp)
         );
         setEditModalOpen(false);
       })
-      .catch((error) => {
-        console.error("Error updating data: ", error);
+      .catch(error => {
+        console.error("Error updating data:", error.response?.data || error.message);
         alert("Failed to update employee. Please try again.");
       });
-  };
+};
+
 
   const handleCloseModal = () => {
     setEditModalOpen(false);
@@ -207,7 +210,8 @@ const TeamMembersTable = () => {
 
   const handleAddSave = (newEmployee) => {
     axios
-      .post("https://jsonserver-2xm2.onrender.com/employeesData", newEmployee)
+      // .post("https://jsonserver-2xm2.onrender.com/employeesData", newEmployee)
+      .post("http://localhost:5000/employeesData", newEmployee)
       .then((response) => {
         setEmployeesData((prevData) => [...prevData, response.data]);
         setAddModalOpen(false);
@@ -229,7 +233,8 @@ const TeamMembersTable = () => {
   const handleUploadSave = (newData) => {
     newData.forEach((employee) => {
       axios
-        .post("https://jsonserver-2xm2.onrender.com/employeesData", employee)
+        // .post("https://jsonserver-2xm2.onrender.com/employeesData", employee)
+        .post("http://localhost:5000/employeesData", employee)
         .then((response) => {
           setEmployeesData((prevData) => [...prevData, response.data]);
         })
@@ -263,18 +268,17 @@ const TeamMembersTable = () => {
     saveAs(file, "employees_data.xlsx");
   };
 
-  const filteredData = employeesData.filter(
-    (row) =>
-      row.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      row.Grade.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      row.Designation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      row.Project.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      row.Skills.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      row.Location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      row.ContactNo.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = employeesData.filter((row) =>
+    (row.Name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (row.Grade?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (row.Designation?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (row.Project?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (row.Skills?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (row.Location?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (row.ContactNo?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   );
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredData.length) : 0;
+  
+  const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredData.length);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);

@@ -1,15 +1,14 @@
-
 import React, { useEffect, useState } from "react";
 import { Chart } from "react-google-charts";
 import axios from "axios";
-import "./BarGraph.css"
+import "./BarGraph.css";
 
 const BarGraph = () => {
   const [data, setData] = useState([["Grade", "Count"]]);
 
   useEffect(() => {
-    // Fetch employee data from the API
-    axios.get("https://jsonserver-2xm2.onrender.com/employeesData")
+    // Fetch employee data from MongoDB through the backend API
+    axios.get("http://localhost:5000/employeesData")
       .then((response) => {
         const employees = response.data;
         calculateGradeDistribution(employees);

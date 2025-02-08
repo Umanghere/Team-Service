@@ -151,17 +151,6 @@
       "Location": "Noida",
       "ContactNo": "73562-73682",
       "id": "7"
-    },
-    {
-      "id": "c0de",
-      "EmpId": "12345678",
-      "Name": "Umang",
-      "Grade": "A1",
-      "Designation": "SDE",
-      "Project": "Team Services",
-      "Skills": "React JS",
-      "Location": "punjab",
-      "ContactNo": "dsljfklsdjflkjds"
     }
   ],
   "trainingData": [

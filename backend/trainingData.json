@@ -1,0 +1,52 @@
+[
+    {
+      "TrainingTitle": "Java",
+      "TrainingType": "Self",
+      "PlannedDate": "2024-08-09T18:30:00.000Z",
+      "StartDate": "2024-08-18T18:30:00.000Z",
+      "EndDate": "2024-08-28T18:30:00.000Z",
+      "Reference": "https://www.udemy.com/course/the-complete-guide-to-angular-2/learn/lecture/6655710?start=60#overview",
+      "Name": "Pernika(123456)",
+      "Status": "In Progress",
+      "Mode": "offline",
+      "id": 1
+    },
+    {
+      "TrainingTitle": "Angular Js",
+      "TrainingType": "Corporate",
+      "PlannedDate": "2024-08-07T18:30:00.000Z",
+      "StartDate": "2024-08-15T18:30:00.000Z",
+      "EndDate": "2024-08-24T18:30:00.000Z",
+      "Reference": "https://www.youtube.com/watch?v=RJ733wzbNoA&list=PLxgZQoSe9cg00xyG5gzb5BMkOClkch7Gr",
+      "Name": "Yash(123457)",
+      "Status": "In Progress",
+      "Mode": "offline",
+      "id": 2
+    },
+    {
+      "TrainingTitle": "Angular Js",
+      "TrainingType": "Self",
+      "PlannedDate": "2024-08-10T18:30:00.000Z",
+      "StartDate": "2024-08-11T18:30:00.000Z",
+      "EndDate": "2024-08-19T18:30:00.000Z",
+      "Reference": "https://www.udemy.com/",
+      "Name": "Megha(123459)",
+      "Status": "In Progress",
+      "Mode": "online",
+      "id": 3
+    },
+    {
+      "TrainingTitle": "C++",
+      "TrainingType": "Self",
+      "PlannedDate": "2024-08-09T18:30:00.000Z",
+      "StartDate": "2024-08-15T18:30:00.000Z",
+      "EndDate": "2024-08-28T18:30:00.000Z",
+      "Reference": "you",
+      "Name": "Umang(12345678)",
+      "Nominate": "Umang(12345678)",
+      "Status": "Open",
+      "Mode": "online",
+      "id": "7d4b"
+    }
+  ]
+  

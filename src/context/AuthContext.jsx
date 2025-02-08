@@ -19,7 +19,8 @@ export const AuthProvider = ({ children }) => {
     setUserRole(role); // Set user role on login
 
     try {
-      const response = await fetch("https://jsonserver-2xm2.onrender.com/users");
+      // const response = await fetch("https://jsonserver-2xm2.onrender.com/users");
+      const response = await fetch("http://localhost:5000/users");
       const users = await response.json();
 
       // Find the user based on the email
@@ -31,7 +32,8 @@ export const AuthProvider = ({ children }) => {
       } else {
         console.error("User not found:", email);
       }
-    } catch (error) {
+    } 
+    catch (error) {
       console.error("Error fetching user data:", error);
     }
   };

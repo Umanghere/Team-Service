@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -142,6 +141,8 @@ const EditModal = ({ open, handleClose, handleSave, employeeData }) => {
                   name="TrainingType"
                   value={formData.TrainingType || ""}
                   onChange={handleChange}
+                  fullWidth
+                  margin="normal"
                 >
                   <MenuItem value="Self">Self</MenuItem>
                   <MenuItem value="Corporate">Corporate</MenuItem>
