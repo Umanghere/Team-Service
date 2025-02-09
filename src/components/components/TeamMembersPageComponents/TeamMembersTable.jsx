@@ -154,7 +154,7 @@ const TeamMembersTable = () => {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false); // New state for upload modal
   const [editData, setEditData] = useState({});
-  const { userRole, userEmpId}= useAuth(); // Access user role, EmpId, and userName from context
+  const { userRole, userEmpId } = useAuth(); // Access user role, EmpId, and userName from context
 
   useEffect(() => {
     axios
@@ -168,6 +168,7 @@ const TeamMembersTable = () => {
       });
   }, []);
 
+  // EDIT (update) details of Members
   const handleEdit = (employee) => {
     if (userRole === "viewer" && employee.EmpId !== userEmpId) {
       alert("You can only edit your own data.");
@@ -181,15 +182,19 @@ const TeamMembersTable = () => {
   // console.log("Selected Employee ID:", employee.EmpId);
 
 
+  // On saving the updated employees
   const handleSave = (updatedEmployee) => {
-    console.log("Updating Employee:", updatedEmployee); // Debugging
+    if (!updatedEmployee._id) {
+        alert("Invalid employee data. Missing _id.");
+        return;
+    }
 
-    axios.put(`http://localhost:5000/employeesData/${updatedEmployee.id}`, updatedEmployee)
+    axios.put(`http://localhost:5000/employeesData/${updatedEmployee._id}`, updatedEmployee)
       .then(response => {
-        console.log("Updated Employee Response:", response.data); // Debugging
+        console.log("Updated Employee Response:", response.data);
 
         setEmployeesData(prevData =>
-          prevData.map(emp => emp.id === updatedEmployee.id ? response.data : emp)
+          prevData.map(emp => emp._id === updatedEmployee._id ? response.data : emp)
         );
         setEditModalOpen(false);
       })
@@ -200,36 +205,52 @@ const TeamMembersTable = () => {
 };
 
 
+  //Close the Edit form after Updating
   const handleCloseModal = () => {
     setEditModalOpen(false);
   };
 
+  // Open Form to ADD a Member
   const handleAdd = () => {
     setAddModalOpen(true);
   };
 
-  const handleAddSave = (newEmployee) => {
-    axios
-      // .post("https://jsonserver-2xm2.onrender.com/employeesData", newEmployee)
-      .post("http://localhost:5000/employeesData", newEmployee)
-      .then((response) => {
-        setEmployeesData((prevData) => [...prevData, response.data]);
-        setAddModalOpen(false);
-      })
-      .catch((error) => {
-        console.error("Error adding data: ", error);
-        alert("Failed to add employee. Please try again.");
+  // ADD the New Member manually
+  const handleAddSave = async (employeeData) => {
+    try {
+      const response = await fetch('http://localhost:5000/employeesData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(employeeData),
       });
+  
+      if (!response.ok) {
+        throw new Error('Failed to add employee');
+      }
+  
+      const newEmployee = await response.json();
+      setEmployeesData((prev) => [...prev, newEmployee]); // Update frontend state
+      handleAddClose(); // Close modal after successful save
+    } catch (error) {
+      console.error('Error adding employee:', error);
+    }
   };
-
+  
+  // Close Form to Add new Member
   const handleAddClose = () => {
     setAddModalOpen(false);
   };
 
+  
+  // Form to Upload Members from device(excel sheet)
   const handleUploadOpen = () => {
     setUploadModalOpen(true);
   };
 
+
+  //Adding (uploading) New Member in Team Members by Uploading from Device
   const handleUploadSave = (newData) => {
     newData.forEach((employee) => {
       axios
@@ -246,14 +267,17 @@ const TeamMembersTable = () => {
     setUploadModalOpen(false);
   };
 
+  // Close form to add (upload) new members
   const handleUploadClose = () => {
     setUploadModalOpen(false);
   };
 
+  // Search Function
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
+  // Download data in Excel sheet
   const handleDownload = () => {
     const worksheet = XLSX.utils.json_to_sheet(employeesData);
     const workbook = XLSX.utils.book_new();
@@ -268,16 +292,20 @@ const TeamMembersTable = () => {
     saveAs(file, "employees_data.xlsx");
   };
 
-  const filteredData = employeesData.filter((row) =>
-    (row.Name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (row.Grade?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (row.Designation?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (row.Project?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (row.Skills?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (row.Location?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (row.ContactNo?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+  // Searching method implementation
+  const filteredData = employeesData.filter(
+    (row) =>
+      (row.Name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (row.Grade?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (row.Designation?.toLowerCase() || "").includes(
+        searchTerm.toLowerCase()
+      ) ||
+      (row.Project?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (row.Skills?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (row.Location?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (row.ContactNo?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   );
-  
+
   const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredData.length);
 
   const handleChangePage = (event, newPage) => {
@@ -288,6 +316,8 @@ const TeamMembersTable = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+  
+
   return (
     <Box sx={{ paddingRight: 10, paddingLeft: 10 }}>
       <AppBar
@@ -403,23 +433,23 @@ const TeamMembersTable = () => {
                 <TableCell>{row.Location}</TableCell>
                 <TableCell>{row.ContactNo}</TableCell>
                 <TableCell>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
                     <Tooltip title="Edit Employee List">
                       <IconButton
                         sx={{ color: "blue", "&:hover": { color: "darkblue" } }}
                         onClick={() => handleEdit(row)}
-                      disabled={
-                        userRole === "viewer" && row.EmpId !== userEmpId
-                      }
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
+                        disabled={
+                          userRole === "viewer" && row.EmpId !== userEmpId
+                        }
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
                   </Box>
                 </TableCell>
               </TableRow>
             ))}
-                      {emptyRows > 0 && (
+            {emptyRows > 0 && (
               <TableRow style={{ height: 53 * emptyRows }}>
                 <TableCell colSpan={9} />
               </TableRow>
