@@ -18,6 +18,7 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import TableHead from "@mui/material/TableHead";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import UploadIcon from "@mui/icons-material/Upload";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -166,7 +167,7 @@ const TeamMembersTable = () => {
       .catch((error) => {
         console.error("Error fetching data: ", error);
       });
-  }, []);
+  }, [DeleteIcon]);
 
   // EDIT (update) details of Members
   const handleEdit = (employee) => {
@@ -178,32 +179,64 @@ const TeamMembersTable = () => {
     setEditModalOpen(true);
   };
 
+  // DELETE Function to delete the user if ADMIN or MANAGER
+  const handleDelete = async (_id) => {
+    if (!window.confirm("Are you sure you want to delete this employee?")) return;
+  
+    // Check if _id is valid
+    if (!_id || _id.length !== 24) {
+      alert("Invalid Employee ID. Deletion failed.");
+      return;
+    }
+  
+    try {
+      const response = await axios.delete(
+        `http://localhost:5000/employeesData/${_id}`
+      );
+  
+      if (response.status === 200) {
+        alert("Employee deleted successfully!");
+        setEmployeesData((prevEmployees) => prevEmployees.filter(emp => emp._id !== _id));
+      }
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      alert("Failed to delete employee. Please try again.");
+    }
+  };
+
   // console.log("Current User ID:", userEmpId);
   // console.log("Selected Employee ID:", employee.EmpId);
-
 
   // On saving the updated employees
   const handleSave = (updatedEmployee) => {
     if (!updatedEmployee._id) {
-        alert("Invalid employee data. Missing _id.");
-        return;
+      alert("Invalid employee data. Missing _id.");
+      return;
     }
 
-    axios.put(`http://localhost:5000/employeesData/${updatedEmployee._id}`, updatedEmployee)
-      .then(response => {
+    axios
+      .put(
+        `http://localhost:5000/employeesData/${updatedEmployee._id}`,
+        updatedEmployee
+      )
+      .then((response) => {
         console.log("Updated Employee Response:", response.data);
 
-        setEmployeesData(prevData =>
-          prevData.map(emp => emp._id === updatedEmployee._id ? response.data : emp)
+        setEmployeesData((prevData) =>
+          prevData.map((emp) =>
+            emp._id === updatedEmployee._id ? response.data : emp
+          )
         );
         setEditModalOpen(false);
       })
-      .catch(error => {
-        console.error("Error updating data:", error.response?.data || error.message);
+      .catch((error) => {
+        console.error(
+          "Error updating data:",
+          error.response?.data || error.message
+        );
         alert("Failed to update employee. Please try again.");
       });
-};
-
+  };
 
   //Close the Edit form after Updating
   const handleCloseModal = () => {
@@ -218,37 +251,35 @@ const TeamMembersTable = () => {
   // ADD the New Member manually
   const handleAddSave = async (employeeData) => {
     try {
-      const response = await fetch('http://localhost:5000/employeesData', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/employeesData", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(employeeData),
       });
-  
+
       if (!response.ok) {
-        throw new Error('Failed to add employee');
+        throw new Error("Failed to add employee");
       }
-  
+
       const newEmployee = await response.json();
       setEmployeesData((prev) => [...prev, newEmployee]); // Update frontend state
       handleAddClose(); // Close modal after successful save
     } catch (error) {
-      console.error('Error adding employee:', error);
+      console.error("Error adding employee:", error);
     }
   };
-  
+
   // Close Form to Add new Member
   const handleAddClose = () => {
     setAddModalOpen(false);
   };
 
-  
   // Form to Upload Members from device(excel sheet)
   const handleUploadOpen = () => {
     setUploadModalOpen(true);
   };
-
 
   //Adding (uploading) New Member in Team Members by Uploading from Device
   const handleUploadSave = (newData) => {
@@ -316,7 +347,6 @@ const TeamMembersTable = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  
 
   return (
     <Box sx={{ paddingRight: 10, paddingLeft: 10 }}>
@@ -402,15 +432,15 @@ const TeamMembersTable = () => {
         <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bold" }}>EmpID</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Grade</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Designation</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Project</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Skills</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Location</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>ContactNo</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>EmpID</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Name</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Grade</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Designation</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Project</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Skills</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Location</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>ContactNo</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -422,18 +452,19 @@ const TeamMembersTable = () => {
               : filteredData
             ).map((row) => (
               <TableRow key={row.EmpId}>
-                <TableCell component="th" scope="row">
+                <TableCell align="center" component="th" scope="row">
                   {row.EmpId}
                 </TableCell>
-                <TableCell>{row.Name}</TableCell>
-                <TableCell>{row.Grade}</TableCell>
-                <TableCell>{row.Designation}</TableCell>
-                <TableCell>{row.Project}</TableCell>
-                <TableCell>{row.Skills}</TableCell>
-                <TableCell>{row.Location}</TableCell>
-                <TableCell>{row.ContactNo}</TableCell>
-                <TableCell>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                <TableCell align="center">{row.Name}</TableCell>
+                <TableCell align="center">{row.Grade}</TableCell>
+                <TableCell align="center">{row.Designation}</TableCell>
+                <TableCell align="center">{row.Project}</TableCell>
+                <TableCell align="center">{row.Skills}</TableCell>
+                <TableCell align="center">{row.Location}</TableCell>
+                <TableCell align="center">{row.ContactNo}</TableCell>
+                <TableCell align="center">
+                  <Box sx={{ display: "flex"}}>
+                    {/* EDIT BUTTON */}
                     <Tooltip title="Edit Employee List">
                       <IconButton
                         sx={{ color: "blue", "&:hover": { color: "darkblue" } }}
@@ -445,6 +476,18 @@ const TeamMembersTable = () => {
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
+
+                    {/* DELETE BUTTON - Hidden for Viewers */}
+                    {userRole !== "viewer" && (
+                      <Tooltip title="Delete Employee">
+                        <IconButton
+                          sx={{ color: "red", "&:hover": { color: "darkred" } }}
+                          onClick={() => handleDelete(row._id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   </Box>
                 </TableCell>
               </TableRow>

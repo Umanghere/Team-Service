@@ -40,17 +40,13 @@ router.patch("/:id", async (req, res) => {
   }
 });
 
-// ✅ DELETE: Remove an employee
-router.delete("/:id", async (req, res) => {
+// DELETE: Remove an employee
+router.delete("/:empId", async (req, res) => {
   try {
-    const { id } = req.params;
+    const { empId } = req.params;
 
-    // 🛑 Validate MongoDB ID before deleting
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid Employee ID" });
-    }
-
-    const deletedEmployee = await EmployeesData.findByIdAndDelete(id);
+    // Find and delete employee by EmpId instead of MongoDB _id
+    const deletedEmployee = await EmployeesData.findOneAndDelete({ EmpId: empId });
 
     if (!deletedEmployee) {
       return res.status(404).json({ error: "Employee not found" });
@@ -62,5 +58,7 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: "Error deleting employee" });
   }
 });
+
+
 
 module.exports = router;
