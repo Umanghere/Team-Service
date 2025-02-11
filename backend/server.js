@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const User = require('./models/User'); // Ensure the correct path
 const Employee = require('./models/EmployeesData'); // Ensure the correct path
-const Training = require('./models/TrainingData')
+const Training = require('./models/TrainingData'); // Ensure the correct path
 
 const app = express();
 
@@ -16,6 +16,10 @@ mongoose.connect('mongodb://localhost:27017/Team-Services')
   .then(() => console.log('Connected to MongoDB'))
   .catch((error) => console.error('Error connecting to MongoDB', error));
 
+// -------------------------------------------------------------------------
+// --------------------------- LOGIN ROUTE ---------------------------------
+// -------------------------------------------------------------------------
+
 // Login route to authenticate users
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
@@ -25,12 +29,12 @@ app.post('/login', async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({ message: "Email not found" }); // User does not exist
+      return res.status(404).json({ message: "Email not found" });
     }
 
     // Check if password matches
     if (user.password !== password) {
-      return res.status(401).json({ message: "Incorrect password" }); // Wrong password
+      return res.status(401).json({ message: "Incorrect password" });
     }
 
     // If email & password are correct, return user details
@@ -43,17 +47,15 @@ app.post('/login', async (req, res) => {
 
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: "Server error" }); // Internal error
+    res.status(500).json({ message: "Server error" });
   }
 });
 
+// -------------------------------------------------------------------------
+// -------------------------- USER ROUTES ----------------------------------
+// -------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-
-
-// Route to fetch all USERS
+// Fetch all users
 app.get('/users', async (req, res) => {
   try {
     const users = await User.find();
@@ -64,7 +66,11 @@ app.get('/users', async (req, res) => {
   }
 });
 
-// Route to FETCH all employees
+// -------------------------------------------------------------------------
+// ---------------------- EMPLOYEES DATA ROUTES -----------------------------
+// -------------------------------------------------------------------------
+
+// Fetch all employees
 app.get('/employeesData', async (req, res) => {
   try {
     const employees = await Employee.find();
@@ -75,7 +81,7 @@ app.get('/employeesData', async (req, res) => {
   }
 });
 
-// UPDATE members in TEAM MEMBERS TABLE
+// Update an employee
 app.put('/employeesData/:id', async (req, res) => {
   try {
     const updatedEmployee = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -85,7 +91,7 @@ app.put('/employeesData/:id', async (req, res) => {
   }
 });
 
-// Route to ADD new member in TEAM MEMBERS TABLE
+// Add a new employee
 app.post('/employeesData', async (req, res) => {
   try {
     const newEmployee = new Employee(req.body);
@@ -97,40 +103,32 @@ app.post('/employeesData', async (req, res) => {
   }
 });
 
-// UPLOAD members in TEAM MEMBERS TABLE form device using Excel sheet
+// Upload multiple employees from Excel or bulk data
 app.post('/employeesData/upload', async (req, res) => {
   try {
-    const newEmployees = req.body; // Data from frontend
+    const newEmployees = req.body;
     if (!Array.isArray(newEmployees) || newEmployees.length === 0) {
       return res.status(400).json({ message: 'Invalid or empty data' });
     }
-
     await Employee.insertMany(newEmployees);
     res.status(201).json({ message: 'Employees added successfully' });
-
   } catch (error) {
     console.error('Error uploading employees:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// DELETE an employee from TEAM MEMBERS TABLE
+// Delete an employee
 app.delete('/employeesData/:id', async (req, res) => {
   try {
     const { id } = req.params;
-
-    // Validate if id is a correct MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: 'Invalid Employee ID format' });
     }
-
-    // Find and delete the employee using `_id`
     const deletedEmployee = await Employee.findByIdAndDelete(id);
-
     if (!deletedEmployee) {
       return res.status(404).json({ message: 'Employee not found' });
     }
-
     res.status(200).json({ message: 'Employee deleted successfully' });
   } catch (error) {
     console.error('Error deleting employee:', error);
@@ -138,16 +136,11 @@ app.delete('/employeesData/:id', async (req, res) => {
   }
 });
 
+// -------------------------------------------------------------------------
+// ------------------------- TRAINING DATA ROUTES ---------------------------
+// -------------------------------------------------------------------------
 
-
-
-
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-
-
-// Route to fetch training data
+// Fetch all training data
 app.get('/trainingData', async (req, res) => {
   try {
     const trainingData = await Training.find();
@@ -158,7 +151,65 @@ app.get('/trainingData', async (req, res) => {
   }
 });
 
-// Start the server
+// Update training data
+app.put('/trainingData/:id', async (req, res) => {
+  try {
+    const updatedTraining = await Training.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedTraining);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating training', error });
+  }
+});
+
+// Add new training
+app.post('/trainingData', async (req, res) => {
+  try {
+    const newTraining = new Training(req.body);
+    await newTraining.save();
+    res.status(201).json(newTraining);
+  } catch (error) {
+    console.error('Error adding training:', error);
+    res.status(500).json({ message: 'Error adding training', error });
+  }
+});
+
+// Upload multiple training data entries
+app.post('/trainingData/upload', async (req, res) => {
+  try {
+    const newTrainings = req.body;
+    if (!Array.isArray(newTrainings) || newTrainings.length === 0) {
+      return res.status(400).json({ message: 'Invalid or empty data' });
+    }
+    await Training.insertMany(newTrainings);
+    res.status(201).json({ message: 'Training data added successfully' });
+  } catch (error) {
+    console.error('Error uploading training data:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Delete a training entry
+app.delete('/trainingData/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid Training ID format' });
+    }
+    const deletedTraining = await Training.findByIdAndDelete(id);
+    if (!deletedTraining) {
+      return res.status(404).json({ message: 'Training entry not found' });
+    }
+    res.status(200).json({ message: 'Training entry deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting training:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// -------------------------------------------------------------------------
+// ---------------------------- START SERVER -------------------------------
+// -------------------------------------------------------------------------
+
 const port = 5000;
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);

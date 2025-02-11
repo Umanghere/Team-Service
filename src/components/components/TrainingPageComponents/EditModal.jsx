@@ -1,16 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Modal,
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Grid,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-} from "@mui/material";
+import { Modal, Box, Typography, TextField, Button, Grid, MenuItem, Select, InputLabel, FormControl,} from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import PropTypes from "prop-types";
@@ -71,8 +60,10 @@ const EditModal = ({ open, handleClose, handleSave, employeeData }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Saving data:", formData);  // Debugging log
     handleSave(formData);
   };
+  
 
   return (
     <Modal

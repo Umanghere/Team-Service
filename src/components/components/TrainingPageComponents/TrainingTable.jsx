@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import axios from "axios";
 import { useState, useEffect } from "react";
@@ -161,7 +160,7 @@ export default function TrainingTable() {
   useEffect(() => {
     axios
       // .get("https://jsonserver-2xm2.onrender.com/trainingData")
-      .get("http://localhost:8000/trainingData")
+      .get("http://localhost:5000/trainingData")
       .then((response) => {
         setTrainingData(response.data);
       })
@@ -176,46 +175,61 @@ export default function TrainingTable() {
   };
 
   const handleSave = (updatedEmployee) => {
+    if (!updatedEmployee || !updatedEmployee._id) {
+      console.error("Updated employee is null or missing _id!");
+      alert("Something went wrong. Please refresh and try again.");
+      return;
+    }
+  
     axios
-      .put(
-        // `https://jsonserver-2xm2.onrender.com/trainingData/${updatedEmployee.id}`,
-        `http://localhost:8000/trainingData/${updatedEmployee.id}`,
-        updatedEmployee
-      )
+      .put(`http://localhost:5000/trainingData/${updatedEmployee._id}`, updatedEmployee)
       .then((response) => {
         setTrainingData((prevData) =>
           prevData.map((emp) =>
-            emp.id === updatedEmployee.id ? response.data : emp
+            emp._id === updatedEmployee._id ? response.data : emp
           )
         );
-        setEditModalOpen(false);
+        handleCloseModal();
       })
       .catch((error) => {
         console.error("Error updating data: ", error);
         alert("Failed to update employee. Please try again.");
       });
   };
+  
 
   const handleCloseModal = () => {
     setEditModalOpen(false);
+    // alert("Updated Successfully")
   };
 
   const handleAdd = () => {
     setAddModalOpen(true);
   };
 
-  const handleAddSave = (newEmployee) => {
-    axios
-      .post("https://jsonserver-2xm2.onrender.com/trainingData", newEmployee)
-      .then((response) => {
-        setTrainingData((prevData) => [...prevData, response.data]);
-        setAddModalOpen(false);
-      })
-      .catch((error) => {
-        console.error("Error adding data: ", error);
-        alert("Failed to add employee. Please try again.");
+  const handleAddSave = async (newEmployee) => {
+    try {
+      const response = await fetch("http://localhost:5000/trainingData", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newEmployee),
       });
+
+      if (!response.ok) {
+        throw new Error("Failed to add training data");
+      }
+
+      const addedTraining = await response.json();
+      setTrainingData((prevData) => [...prevData, addedTraining]); // Update frontend state
+      handleAddClose(); // Close modal after successful save
+    } catch (error) {
+      console.error("Error adding training data:", error);
+      alert("Failed to add training data. Please try again.");
+    }
   };
+
 
   const handleAddClose = () => {
     setAddModalOpen(false);
@@ -242,7 +256,9 @@ export default function TrainingTable() {
       bookType: "xlsx",
       type: "array",
     });
-    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    const blob = new Blob([excelBuffer], { 
+      type: "application/octet-stream" 
+    });
     saveAs(blob, "training_data.xlsx");
   };
   const handleCopy = (row) => {
@@ -344,15 +360,15 @@ export default function TrainingTable() {
         <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Training Title</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Training Type</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Mode</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Planned Date</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Start Date</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>End Date</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Name</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Training Title</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Training Type</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Mode</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Planned Date</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Start Date</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>End Date</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Status</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -364,22 +380,25 @@ export default function TrainingTable() {
               : filteredData
             ).map((row) => (
               <TableRow key={row.id}>
-                <TableCell>{row.Name}</TableCell>
+                <TableCell align="center" >
+                  {row.Name}
+                </TableCell>
                 {/* <TableCell>{row.TrainingTitle}</TableCell> */}
-                <TableCell>
+                <TableCell align="center">
                   {row.TrainingTitle.split(",").map((title, index) => (
                     <div key={index}>{title.trim()}</div>
                   ))}
                 </TableCell>
 
-                <TableCell>{row.TrainingType}</TableCell>
-                <TableCell>{row.Mode}</TableCell>
-                <TableCell>{formatDate(row.PlannedDate)}</TableCell>
-                <TableCell>{formatDate(row.StartDate)}</TableCell>
-                <TableCell>{formatDate(row.EndDate)}</TableCell>
-                <TableCell>{row.Status}</TableCell>
-                <TableCell>
+                <TableCell align="center">{row.TrainingType}</TableCell>
+                <TableCell align="center">{row.Mode}</TableCell>
+                <TableCell align="center">{formatDate(row.PlannedDate)}</TableCell>
+                <TableCell align="center">{formatDate(row.StartDate)}</TableCell>
+                <TableCell align="center">{formatDate(row.EndDate)}</TableCell>
+                <TableCell align="center">{row.Status}</TableCell>
+                <TableCell align="center">
                   <Box sx={{ display: "flex", alignItems: "center" }}>
+                    {/* EDIT BUTTON */}
                     <Tooltip title="Edit Employee List">
                       <IconButton
                         sx={{
@@ -395,6 +414,7 @@ export default function TrainingTable() {
                       </IconButton>
                     </Tooltip>
 
+                    {/* DELETE BUTTON - Hidden for Viewers */}
                     <Tooltip title="Copy Employee Details">
                       <IconButton
                         sx={{

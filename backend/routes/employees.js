@@ -59,6 +59,4 @@ router.delete("/:empId", async (req, res) => {
   }
 });
 
-
-
 module.exports = router;

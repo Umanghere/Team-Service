@@ -463,7 +463,7 @@ const TeamMembersTable = () => {
                 <TableCell align="center">{row.Location}</TableCell>
                 <TableCell align="center">{row.ContactNo}</TableCell>
                 <TableCell align="center">
-                  <Box sx={{ display: "flex"}}>
+                  <Box sx={{ display: "flex", alignItems:"center"}}>
                     {/* EDIT BUTTON */}
                     <Tooltip title="Edit Employee List">
                       <IconButton
