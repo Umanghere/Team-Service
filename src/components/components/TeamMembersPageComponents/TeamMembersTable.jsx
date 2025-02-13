@@ -35,6 +35,8 @@ import UploadModal from "./UploadModal";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useAuth } from "../../../context/AuthContext";
+import { ToastContainer, toast } from 'react-toastify';
+
 
 // Styled components for search input
 const Search = styled("div")(({ theme }) => ({
@@ -181,22 +183,25 @@ const TeamMembersTable = () => {
 
   // DELETE Function to delete the user if ADMIN or MANAGER
   const handleDelete = async (_id) => {
-    if (!window.confirm("Are you sure you want to delete this employee?")) return;
-  
+    if (!window.confirm("Are you sure you want to delete this employee?"))
+      return;
+
     // Check if _id is valid
     if (!_id || _id.length !== 24) {
       alert("Invalid Employee ID. Deletion failed.");
       return;
     }
-  
+
     try {
       const response = await axios.delete(
         `http://localhost:5000/employeesData/${_id}`
       );
-  
+
       if (response.status === 200) {
         alert("Employee deleted successfully!");
-        setEmployeesData((prevEmployees) => prevEmployees.filter(emp => emp._id !== _id));
+        setEmployeesData((prevEmployees) =>
+          prevEmployees.filter((emp) => emp._id !== _id)
+        );
       }
     } catch (error) {
       console.error("Error deleting employee:", error);
@@ -228,6 +233,16 @@ const TeamMembersTable = () => {
           )
         );
         setEditModalOpen(false);
+        toast.success("Updated Successfully", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light"
+        });
       })
       .catch((error) => {
         console.error(
@@ -349,203 +364,241 @@ const TeamMembersTable = () => {
   };
 
   return (
-    <Box sx={{ paddingRight: 10, paddingLeft: 10 }}>
-      <AppBar
-        position="static"
-        sx={{ backgroundColor: "var(--lt-color-gray-400)" }}
-      >
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Typography
-              variant="inherit"
-              noWrap
-              sx={{ color: "black", display: { xs: "none", sm: "block" } }}
-            >
-              Employee
-            </Typography>
-            <Search>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{
-                  "aria-label": "search",
-                  style: { color: "black" },
-                }}
-                value={searchTerm}
-                onChange={handleSearchChange}
-              />
-            </Search>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            {userRole === "admin" && (
-              <>
-                <Tooltip title="Add Employee">
-                  <IconButton
-                    onClick={handleAdd}
-                    sx={{
-                      backgroundColor: "blue",
-                      color: "white",
-                      "&:hover": { backgroundColor: "darkblue" },
-                      marginRight: "8px", // Space between Add and Upload
-                    }}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Upload Employee List">
-                  <IconButton
-                    onClick={handleUploadOpen}
-                    sx={{
-                      backgroundColor: "red",
-                      color: "white",
-                      "&:hover": { backgroundColor: "darkred" },
-                      marginRight: "8px", // Space between Upload and Download
-                    }}
-                  >
-                    <UploadIcon />
-                  </IconButton>
-                </Tooltip>
-              </>
-            )}
-            {(userRole === "admin" ||
-              userRole === "manager" ||
-              userRole === "viewer") && (
-              <Tooltip title="Download Employee List">
-                <IconButton
-                  onClick={handleDownload}
-                  sx={{
-                    backgroundColor: "green",
-                    color: "white",
-                    "&:hover": { backgroundColor: "darkgreen" },
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <Box sx={{ paddingRight: 10, paddingLeft: 10 }}>
+        <AppBar
+          position="static"
+          sx={{ backgroundColor: "var(--lt-color-gray-400)" }}
+        >
+          <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography
+                variant="inherit"
+                noWrap
+                sx={{ color: "black", display: { xs: "none", sm: "block" } }}
+              >
+                Employee
+              </Typography>
+              <Search>
+                <SearchIconWrapper>
+                  <SearchIcon />
+                </SearchIconWrapper>
+                <StyledInputBase
+                  placeholder="Search…"
+                  inputProps={{
+                    "aria-label": "search",
+                    style: { color: "black" },
                   }}
-                >
-                  <DownloadIcon />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Box>
-        </Toolbar>
-      </AppBar>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
-          <TableHead>
-            <TableRow>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>EmpID</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Name</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Grade</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Designation</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Project</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Skills</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Location</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>ContactNo</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {(rowsPerPage > 0
-              ? filteredData.slice(
-                  page * rowsPerPage,
-                  page * rowsPerPage + rowsPerPage
-                )
-              : filteredData
-            ).map((row) => (
-              <TableRow key={row.EmpId}>
-                <TableCell align="center" component="th" scope="row">
-                  {row.EmpId}
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
+              </Search>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              {userRole === "admin" && (
+                <>
+                  <Tooltip title="Add Employee">
+                    <IconButton
+                      onClick={handleAdd}
+                      sx={{
+                        backgroundColor: "blue",
+                        color: "white",
+                        "&:hover": { backgroundColor: "darkblue" },
+                        marginRight: "8px", // Space between Add and Upload
+                      }}
+                    >
+                      <AddIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Upload Employee List">
+                    <IconButton
+                      onClick={handleUploadOpen}
+                      sx={{
+                        backgroundColor: "red",
+                        color: "white",
+                        "&:hover": { backgroundColor: "darkred" },
+                        marginRight: "8px", // Space between Upload and Download
+                      }}
+                    >
+                      <UploadIcon />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
+              {(userRole === "admin" ||
+                userRole === "manager" ||
+                userRole === "viewer") && (
+                <Tooltip title="Download Employee List">
+                  <IconButton
+                    onClick={handleDownload}
+                    sx={{
+                      backgroundColor: "green",
+                      color: "white",
+                      "&:hover": { backgroundColor: "darkgreen" },
+                    }}
+                  >
+                    <DownloadIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
+          </Toolbar>
+        </AppBar>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
+            <TableHead>
+              <TableRow>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  EmpID
                 </TableCell>
-                <TableCell align="center">{row.Name}</TableCell>
-                <TableCell align="center">{row.Grade}</TableCell>
-                <TableCell align="center">{row.Designation}</TableCell>
-                <TableCell align="center">{row.Project}</TableCell>
-                <TableCell align="center">{row.Skills}</TableCell>
-                <TableCell align="center">{row.Location}</TableCell>
-                <TableCell align="center">{row.ContactNo}</TableCell>
-                <TableCell align="center">
-                  <Box sx={{ display: "flex", alignItems:"center"}}>
-                    {/* EDIT BUTTON */}
-                    <Tooltip title="Edit Employee List">
-                      <IconButton
-                        sx={{ color: "blue", "&:hover": { color: "darkblue" } }}
-                        onClick={() => handleEdit(row)}
-                        disabled={
-                          userRole === "viewer" && row.EmpId !== userEmpId
-                        }
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-
-                    {/* DELETE BUTTON - Hidden for Viewers */}
-                    {userRole !== "viewer" && (
-                      <Tooltip title="Delete Employee">
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Name
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Grade
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Designation
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Project
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Skills
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Location
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  ContactNo
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {(rowsPerPage > 0
+                ? filteredData.slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                : filteredData
+              ).map((row) => (
+                <TableRow key={row.EmpId}>
+                  <TableCell align="center" component="th" scope="row">
+                    {row.EmpId}
+                  </TableCell>
+                  <TableCell align="center">{row.Name}</TableCell>
+                  <TableCell align="center">{row.Grade}</TableCell>
+                  <TableCell align="center">{row.Designation}</TableCell>
+                  <TableCell align="center">{row.Project}</TableCell>
+                  <TableCell align="center">{row.Skills}</TableCell>
+                  <TableCell align="center">{row.Location}</TableCell>
+                  <TableCell align="center">{row.ContactNo}</TableCell>
+                  <TableCell align="center">
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      {/* EDIT BUTTON */}
+                      <Tooltip title="Edit Employee List">
                         <IconButton
-                          sx={{ color: "red", "&:hover": { color: "darkred" } }}
-                          onClick={() => handleDelete(row._id)}
+                          sx={{
+                            color: "blue",
+                            "&:hover": { color: "darkblue" },
+                          }}
+                          onClick={() => handleEdit(row)}
+                          disabled={
+                            userRole === "viewer" && row.EmpId !== userEmpId
+                          }
                         >
-                          <DeleteIcon />
+                          <EditIcon />
                         </IconButton>
                       </Tooltip>
-                    )}
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
-            {emptyRows > 0 && (
-              <TableRow style={{ height: 53 * emptyRows }}>
-                <TableCell colSpan={9} />
-              </TableRow>
-            )}
-          </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-                colSpan={9}
-                count={filteredData.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                slotProps={{
-                  select: {
-                    inputProps: {
-                      "aria-label": "rows per page",
+
+                      {/* DELETE BUTTON - Hidden for Viewers */}
+                      {userRole !== "viewer" && (
+                        <Tooltip title="Delete Employee">
+                          <IconButton
+                            sx={{
+                              color: "red",
+                              "&:hover": { color: "darkred" },
+                            }}
+                            onClick={() => handleDelete(row._id)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {emptyRows > 0 && (
+                <TableRow style={{ height: 53 * emptyRows }}>
+                  <TableCell colSpan={9} />
+                </TableRow>
+              )}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={9}
+                  count={filteredData.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  slotProps={{
+                    select: {
+                      inputProps: {
+                        "aria-label": "rows per page",
+                      },
+                      native: true,
                     },
-                    native: true,
-                  },
-                }}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                ActionsComponent={TablePaginationActions}
-              />
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </TableContainer>
+                  }}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  ActionsComponent={TablePaginationActions}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </TableContainer>
 
-      {/* Edit Modal */}
-      {editModalOpen && (
-        <EditModal
-          open={editModalOpen}
-          handleClose={handleCloseModal}
-          employee={editData}
-          handleSave={handleSave}
+        {/* Edit Modal */}
+        {editModalOpen && (
+          <EditModal
+            open={editModalOpen}
+            handleClose={handleCloseModal}
+            employee={editData}
+            handleSave={handleSave}
+          />
+        )}
+        {/* add modal */}
+        <AddModal
+          open={addModalOpen}
+          handleClose={handleAddClose}
+          handleSave={handleAddSave}
         />
-      )}
-      {/* add modal */}
-      <AddModal
-        open={addModalOpen}
-        handleClose={handleAddClose}
-        handleSave={handleAddSave}
-      />
 
-      {/* Upload Modal */}
-      <UploadModal
-        open={uploadModalOpen}
-        handleClose={handleUploadClose}
-        handleSave={handleUploadSave}
-      />
-    </Box>
+        {/* Upload Modal */}
+        <UploadModal
+          open={uploadModalOpen}
+          handleClose={handleUploadClose}
+          handleSave={handleUploadSave}
+        />
+      </Box>
+    </>
   );
 };
 

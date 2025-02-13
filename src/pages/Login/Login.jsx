@@ -88,6 +88,12 @@ const Login = () => {
           </button>
         </form>
 
+        <div className="flex justify-center items-center">
+        <p className="flex justify-center items-center gap-2 text-sm text-gray-400 mt-4">
+          Don't have an account? <a href="#" className="text-blue-400 font-semibold"> Sign Up</a>
+        </p>
+        </div>
+
         <p className="text-center text-gray-400 text-sm mt-4">
           Need help?{" "}
           <span className="text-blue-400 hover:underline cursor-pointer">

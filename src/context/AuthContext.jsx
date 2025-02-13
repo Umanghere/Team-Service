@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [userName, setUserName] = useState(""); // State for user name
   const [userEmpId, setUserEmpId] = useState(""); // State for user EmpId
   const navigate = useNavigate();
-  console.log(userEmpId);
+  // console.log(userEmpId);
   // Function to handle login
   const login = async (email, role) => {
     setIsAuthenticated(true);

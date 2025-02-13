@@ -18,8 +18,11 @@ const Cards = () => {
   const [trainingsThisWeek, setTrainingsThisWeek] = useState(0);
   const [viewerTrainingsToday, setViewerTrainingsToday] = useState(0);
   const [viewerTrainingsThisWeek, setViewerTrainingsThisWeek] = useState(0);
-  console.log("userName:", userName);
-  console.log("UserEmpId:", UserEmpId);
+
+
+                                                    // Debugging
+  // console.log("userName:", userName);
+  // console.log("UserEmpId:", UserEmpId);
 
   useEffect(() => {
     fetchEmployeesData();
@@ -48,7 +51,7 @@ const Cards = () => {
   const fetchTrainingData = () => {
     axios
       // .get("https://jsonserver-2xm2.onrender.com/trainingData")
-      .get("http://localhost:5000/employeesData")
+      .get("http://localhost:5000/trainingData")
       .then((response) => {
         calculateTrainingData(response.data);
       })
@@ -60,36 +63,40 @@ const Cards = () => {
   const calculateTrainingData = (data) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Normalize today's date to midnight
-
+  
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay());
-
+  
     const endOfWeek = new Date(today);
     endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
     endOfWeek.setHours(23, 59, 59, 999); // Set end of the week to last millisecond
-
+  
     let totalTrainingsTodayCount = 0;
     let totalTrainingsThisWeekCount = 0;
     let viewerTrainingsTodayCount = 0;
     let viewerTrainingsThisWeekCount = 0;
-
+  
     data.forEach((training) => {
       const plannedDate = new Date(training.PlannedDate);
       const startDate = new Date(training.StartDate);
       const endDate = new Date(training.EndDate);
-      const title = training.TrainingTitle;
-
-      // Extract the name part from training.Name
+      const title = training.TrainingTitle.trim();
+  
       const namePart = training.Name.split("(")[0].trim();
       const isUserTraining = namePart === userName.trim();
-
-      console.log("Name Part:", namePart);
-      console.log("Is User Training:", isUserTraining);
-      // Check if the training is scheduled to start or end today
-      if (
-        (startDate <= today && today <= endDate) ||
-        plannedDate.toDateString() === today.toDateString()
-      ) {
+  
+      // Check if the training is planned for today or ongoing
+      const isTrainingToday =
+        plannedDate.toDateString() === today.toDateString() &&
+        (today >= startDate && today <= endDate);
+  
+      // Check if the training falls within this week
+      const isTrainingThisWeek =
+        (startDate >= startOfWeek && startDate <= endOfWeek) ||
+        (plannedDate >= startOfWeek && plannedDate <= endOfWeek) ||
+        (endDate >= startOfWeek && endDate <= endOfWeek);
+  
+      if (isTrainingToday) {
         if (userRole === "viewer" && isUserTraining) {
           viewerTrainingsTodayCount += title.includes(",")
             ? title.split(",").length
@@ -100,12 +107,8 @@ const Cards = () => {
             : 1;
         }
       }
-
-      // Check if the training falls within this week
-      if (
-        (startDate >= startOfWeek && startDate <= endOfWeek) ||
-        (plannedDate >= startOfWeek && plannedDate <= endOfWeek)
-      ) {
+  
+      if (isTrainingThisWeek) {
         if (userRole === "viewer" && isUserTraining) {
           viewerTrainingsThisWeekCount += title.includes(",")
             ? title.split(",").length
@@ -117,25 +120,31 @@ const Cards = () => {
         }
       }
     });
+  
 
-    console.log(
-      "Trainings Today:",
-      totalTrainingsTodayCount,
-      "Trainings This Week:",
-      totalTrainingsThisWeekCount
-    );
-    console.log(
-      "Viewer Trainings Today:",
-      viewerTrainingsTodayCount,
-      "Viewer Trainings This Week:",
-      viewerTrainingsThisWeekCount
-    );
-
+    //--------------------------------------------------------------------------------------------- Debugging
+      // console.log(
+      //   "Trainings Today:",
+      //   totalTrainingsTodayCount,
+      //   "Trainings This Week:",
+      //   totalTrainingsThisWeekCount
+      // );
+      // console.log(
+      //   "Viewer Trainings Today:",
+      //   viewerTrainingsTodayCount,
+      //   "Viewer Trainings This Week:",
+      //   viewerTrainingsThisWeekCount
+      // );
+    
+    
     setTrainingsToday(totalTrainingsTodayCount);
     setTrainingsThisWeek(totalTrainingsThisWeekCount);
     setViewerTrainingsToday(viewerTrainingsTodayCount);
     setViewerTrainingsThisWeek(viewerTrainingsThisWeekCount);
   };
+  
+
+
 
   const getCardStyle = () => {
     if (isSmallScreen) {

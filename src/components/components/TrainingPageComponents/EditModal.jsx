@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Box, Typography, TextField, Button, Grid, MenuItem, Select, InputLabel, FormControl,} from "@mui/material";
+import {
+  Modal,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Grid,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { ToastContainer, toast } from "react-toastify";
 import PropTypes from "prop-types";
 
 const style = {
@@ -26,7 +38,7 @@ const EditModal = ({ open, handleClose, handleSave, employeeData }) => {
       : null,
     StartDate: employeeData.StartDate ? new Date(employeeData.StartDate) : null,
     EndDate: employeeData.EndDate ? new Date(employeeData.EndDate) : null,
-    Mode: employeeData.Mode || "", 
+    Mode: employeeData.Mode || "",
   });
 
   useEffect(() => {
@@ -39,7 +51,7 @@ const EditModal = ({ open, handleClose, handleSave, employeeData }) => {
         ? new Date(employeeData.StartDate)
         : null,
       EndDate: employeeData.EndDate ? new Date(employeeData.EndDate) : null,
-      Mode: employeeData.Mode || "", 
+      Mode: employeeData.Mode || "",
     });
   }, [employeeData]);
 
@@ -60,136 +72,170 @@ const EditModal = ({ open, handleClose, handleSave, employeeData }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Saving data:", formData);  // Debugging log
+    console.log("Saving data:", formData); // Debugging log
     handleSave(formData);
   };
-  
 
   return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="edit-training-modal"
-      aria-describedby="edit-training-modal-description"
-    >
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <Box sx={style} component="form" onSubmit={handleSubmit}>
-          <Typography id="edit-training-modal" variant="h6" component="h2">
-            Edit Training Data
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                margin="normal"
-                name="Name"
-                label="Name"
-                value={formData.Name || ""}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Training Titles (comma separated)"
-                name="TrainingTitle"
-                value={formData.TrainingTitle}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <DatePicker
-                label="Planned Date"
-                value={formData.PlannedDate}
-                onChange={(value) => handleDateChange("PlannedDate", value)}
-                slots={{ textField: (params) => <TextField {...params} fullWidth margin="normal" /> }} // Updated this line
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <DatePicker
-                label="Start Date"
-                value={formData.StartDate}
-                onChange={(value) => handleDateChange("StartDate", value)}
-                slots={{ textField: (params) => <TextField {...params} fullWidth margin="normal" /> }} // Updated this line
-                PopperProps={{
-                  anchorOrigin: {
-                    vertical: "top",
-                    horizontal: "center",
-                  },
-                  transformOrigin: {
-                    vertical: "bottom",
-                    horizontal: "center",
-                  },
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel id="training-type-label">Training Type</InputLabel>
-                <Select
-                  labelId="training-type-label"
-                  name="TrainingType"
-                  value={formData.TrainingType || ""}
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="edit-training-modal"
+        aria-describedby="edit-training-modal-description"
+      >
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Box sx={style} component="form" onSubmit={handleSubmit}>
+            <Typography id="edit-training-modal" variant="h6" component="h2">
+              Edit Training Data
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  name="Name"
+                  label="Name"
+                  value={formData.Name || ""}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Training Titles (comma separated)"
+                  name="TrainingTitle"
+                  value={formData.TrainingTitle}
                   onChange={handleChange}
                   fullWidth
                   margin="normal"
-                >
-                  <MenuItem value="Self">Self</MenuItem>
-                  <MenuItem value="Corporate">Corporate</MenuItem>
-                </Select>
-              </FormControl>
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <DatePicker
+                  label="Planned Date"
+                  value={formData.PlannedDate}
+                  onChange={(value) => handleDateChange("PlannedDate", value)}
+                  slots={{
+                    textField: (params) => (
+                      <TextField {...params} fullWidth margin="normal" />
+                    ),
+                  }} // Updated this line
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <DatePicker
+                  label="Start Date"
+                  value={formData.StartDate}
+                  onChange={(value) => handleDateChange("StartDate", value)}
+                  slots={{
+                    textField: (params) => (
+                      <TextField {...params} fullWidth margin="normal" />
+                    ),
+                  }} // Updated this line
+                  PopperProps={{
+                    anchorOrigin: {
+                      vertical: "top",
+                      horizontal: "center",
+                    },
+                    transformOrigin: {
+                      vertical: "bottom",
+                      horizontal: "center",
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel id="training-type-label">
+                    Training Type
+                  </InputLabel>
+                  <Select
+                    labelId="training-type-label"
+                    name="TrainingType"
+                    value={formData.TrainingType || ""}
+                    onChange={handleChange}
+                    fullWidth
+                    margin="normal"
+                  >
+                    <MenuItem value="Self">Self</MenuItem>
+                    <MenuItem value="Corporate">Corporate</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel id="mode-label">Mode</InputLabel>
+                  <Select
+                    labelId="mode-label"
+                    name="Mode"
+                    value={formData.Mode || ""}
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="online">online</MenuItem>
+                    <MenuItem value="offline">offline</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel id="status-label">Status</InputLabel>
+                  <Select
+                    labelId="status-label"
+                    name="Status"
+                    value={formData.Status || ""}
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="Open">Open</MenuItem>
+                    <MenuItem value="In Progress">In Progress</MenuItem>
+                    <MenuItem value="Done">Done</MenuItem>
+                    <MenuItem value="Cancelled">Cancelled</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <DatePicker
+                  label="End Date"
+                  value={formData.EndDate}
+                  onChange={(value) => handleDateChange("EndDate", value)}
+                  slots={{
+                    textField: (params) => (
+                      <TextField {...params} fullWidth margin="normal" />
+                    ),
+                  }} // Updated this line
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel id="mode-label">Mode</InputLabel>
-                <Select
-                  labelId="mode-label"
-                  name="Mode"
-                  value={formData.Mode || ""}
-                  onChange={handleChange}
-                >
-                  <MenuItem value="online">online</MenuItem>
-                  <MenuItem value="offline">offline</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel id="status-label">Status</InputLabel>
-                <Select
-                  labelId="status-label"
-                  name="Status"
-                  value={formData.Status || ""}
-                  onChange={handleChange}
-                >
-                  <MenuItem value="Open">Open</MenuItem>
-                  <MenuItem value="In Progress">In Progress</MenuItem>
-                  <MenuItem value="Done">Done</MenuItem>
-                  <MenuItem value="Cancelled">Cancelled</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <DatePicker
-                label="End Date"
-                value={formData.EndDate}
-                onChange={(value) => handleDateChange("EndDate", value)}
-                slots={{ textField: (params) => <TextField {...params} fullWidth margin="normal" /> }} // Updated this line
-              />
-            </Grid>
-          </Grid>
-          <Box sx={{ mt: 2, display: "flex", gap: 2, justifyContent: "right" }}>
-            <Button type="submit" variant="contained" color="primary">
-              Save
-            </Button>
-            <Button onClick={handleClose} variant="contained" color="secondary">
-              Cancel
-            </Button>
+            <Box
+              sx={{ mt: 2, display: "flex", gap: 2, justifyContent: "right" }}
+            >
+              <Button type="submit" variant="contained" color="primary">
+                Save
+              </Button>
+              <Button
+                onClick={handleClose}
+                variant="contained"
+                color="secondary"
+              >
+                Cancel
+              </Button>
+            </Box>
           </Box>
-        </Box>
-      </LocalizationProvider>
-    </Modal>
+        </LocalizationProvider>
+      </Modal>
+    </>
   );
 };
 
