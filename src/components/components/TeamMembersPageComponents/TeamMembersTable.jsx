@@ -198,10 +198,20 @@ const TeamMembersTable = () => {
       );
 
       if (response.status === 200) {
-        alert("Employee deleted successfully!");
+        // alert("Employee deleted successfully!");
         setEmployeesData((prevEmployees) =>
           prevEmployees.filter((emp) => emp._id !== _id)
         );
+        toast.error("Employee Deleted", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light"
+        });
       }
     } catch (error) {
       console.error("Error deleting employee:", error);
@@ -281,6 +291,16 @@ const TeamMembersTable = () => {
       const newEmployee = await response.json();
       setEmployeesData((prev) => [...prev, newEmployee]); // Update frontend state
       handleAddClose(); // Close modal after successful save
+      toast.success("Member Added Successfully", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light"
+      });
     } catch (error) {
       console.error("Error adding employee:", error);
     }
@@ -304,6 +324,16 @@ const TeamMembersTable = () => {
         .post("http://localhost:5000/employeesData", employee)
         .then((response) => {
           setEmployeesData((prevData) => [...prevData, response.data]);
+          toast.success("Members Uploaded Successfully", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light"
+          });
         })
         .catch((error) => {
           console.error("Error adding data from upload: ", error);

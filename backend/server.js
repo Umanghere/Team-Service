@@ -1,7 +1,4 @@
 require('dotenv').config();
-// console.log(process.env);
-// console.log("MONGO_URI:", process.env.MONGO_URI); // Debugging
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -22,10 +19,7 @@ let mongoURI = process.env.MONGO_URI;
 
 console.log("MONGO_URI:", process.env.MONGO_URI);
 
-mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(mongoURI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((error) => console.error('Error connecting to MongoDB:', error));
 
