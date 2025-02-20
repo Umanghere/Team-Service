@@ -10,7 +10,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",  // Local development
-  "https://your-frontend.vercel.app"  // Future deployed frontend
+  "https://team-services.vercel.app/"  // Future deployed frontend
 ];
 
 // Middleware
