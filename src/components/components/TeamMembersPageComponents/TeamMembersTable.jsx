@@ -162,7 +162,7 @@ const TeamMembersTable = () => {
   useEffect(() => {
     axios
       // .get("https://jsonserver-2xm2.onrender.com/employeesData")
-      .get("http://localhost:5000/employeesData")
+      .get("https://teamservicesbackend.up.railway.app/employeesData")
       .then((response) => {
         setEmployeesData(response.data);
       })
@@ -194,7 +194,7 @@ const TeamMembersTable = () => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:5000/employeesData/${_id}`
+        `https://teamservicesbackend.up.railway.app/employeesData/${_id}`
       );
 
       if (response.status === 200) {
@@ -231,7 +231,7 @@ const TeamMembersTable = () => {
 
     axios
       .put(
-        `http://localhost:5000/employeesData/${updatedEmployee._id}`,
+        `https://teamservicesbackend.up.railway.app/employeesData/${updatedEmployee._id}`,
         updatedEmployee
       )
       .then((response) => {
@@ -276,7 +276,7 @@ const TeamMembersTable = () => {
   // ADD the New Member manually
   const handleAddSave = async (employeeData) => {
     try {
-      const response = await fetch("http://localhost:5000/employeesData", {
+      const response = await fetch("https://teamservicesbackend.up.railway.app/employeesData", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -321,7 +321,7 @@ const TeamMembersTable = () => {
     newData.forEach((employee) => {
       axios
         // .post("https://jsonserver-2xm2.onrender.com/employeesData", employee)
-        .post("http://localhost:5000/employeesData", employee)
+        .post("https://teamservicesbackend.up.railway.app/employeesData", employee)
         .then((response) => {
           setEmployeesData((prevData) => [...prevData, response.data]);
           toast.success("Members Uploaded Successfully", {
@@ -539,7 +539,7 @@ const TeamMembersTable = () => {
                   <TableCell align="center">{row.Location}</TableCell>
                   <TableCell align="center">{row.ContactNo}</TableCell>
                   <TableCell align="center">
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Box sx={{ display: "flex", justifyContent: "center", gap:"0.3rem" }}>
                       {/* EDIT BUTTON */}
                       <Tooltip title="Edit Employee List">
                         <IconButton

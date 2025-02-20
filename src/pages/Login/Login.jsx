@@ -14,7 +14,7 @@ const Login = () => {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch("https://teamservicesbackend.up.railway.app/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -87,19 +87,6 @@ const Login = () => {
             Sign In
           </button>
         </form>
-
-        <div className="flex justify-center items-center">
-        <p className="flex justify-center items-center gap-2 text-sm text-gray-400 mt-4">
-          Don't have an account? <a href="#" className="text-blue-400 font-semibold"> Sign Up</a>
-        </p>
-        </div>
-
-        <p className="text-center text-gray-400 text-sm mt-4">
-          Need help?{" "}
-          <span className="text-blue-400 hover:underline cursor-pointer">
-            Contact Support
-          </span>
-        </p>
       </div>
     </div>
   );

@@ -36,18 +36,23 @@ const AddModal = ({ open, handleClose, handleSave }) => {
   const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
+    let isMounted = true; // Prevent state update on unmounted component
+  
     const fetchEmployees = async () => {
       try {
-        // const response = await axios.get("https://jsonserver-2xm2.onrender.com/employeesData");
-        const response = await axios.get("http://localhost:5000/employeesData");
-        setEmployees(response.data);
+        const response = await axios.get("https://teamservicesbackend.up.railway.app/employeesData");
+        if (isMounted) {
+          setEmployees(response.data || []); // Handle empty response case
+        }
       } catch (error) {
         console.error("Failed to fetch employee data:", error);
       }
     };
-
+  
     fetchEmployees();
+    return () => { isMounted = false; }; // Cleanup
   }, []);
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,12 +60,13 @@ const AddModal = ({ open, handleClose, handleSave }) => {
       ...prev,
       [name]: value,
     }));
-
+  
     setErrors((prevErrors) => ({
       ...prevErrors,
-      [name]: !value ? `${name} is required` : "",
+      [name]: value.trim() ? "" : `${name} is required`,
     }));
   };
+  
 
   const handleDateChange = (name, value) => {
     setNewEmployee((prev) => ({
@@ -76,24 +82,25 @@ const AddModal = ({ open, handleClose, handleSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newErrors = {};
-
-    Object.keys(newEmployee).forEach((key) => {
-      if (!newEmployee[key]) {
-        newErrors[key] = `${key} is required`;
-      }
-    });
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-    } else {
-      const dataToSave = {
-        ...newEmployee,
-        Name: newEmployee.Nominate, // Map Nominate field to Name field
-      };
-      handleSave(dataToSave);
-    }
+    const newErrors = Object.fromEntries(
+      Object.entries(newEmployee).map(([key, value]) => [
+        key,
+        value ? "" : `${key} is required`,
+      ])
+    );
+  
+    setErrors(newErrors);
+  
+    if (Object.values(newErrors).some((error) => error)) return;
+  
+    const dataToSave = {
+      ...newEmployee,
+      Name: newEmployee.Nominate, // Map Nominate to Name
+    };
+  
+    handleSave(dataToSave);
   };
+  
 
   return (
     <Modal
@@ -106,7 +113,7 @@ const AddModal = ({ open, handleClose, handleSave }) => {
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <Box component="form" onSubmit={handleSubmit}>
             <Typography id="add-training-modal" variant="h6" component="h2">
-              Add Training Data
+              ADD TRAINING DATA
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
@@ -122,6 +129,7 @@ const AddModal = ({ open, handleClose, handleSave }) => {
                     name="Nominate"
                     value={newEmployee.Nominate}
                     onChange={handleChange}
+                    label="Nominate"
                   >
                     {employees.map((emp) => (
                       <MenuItem
@@ -177,9 +185,10 @@ const AddModal = ({ open, handleClose, handleSave }) => {
                     name="Mode"
                     value={newEmployee.Mode}
                     onChange={handleChange}
+                    label="Mode"
                   >
-                    <MenuItem value="Online">online</MenuItem>
-                    <MenuItem value="Offline">offline</MenuItem>
+                    <MenuItem value="Online">Online</MenuItem>
+                    <MenuItem value="Offline">Offline</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -215,6 +224,7 @@ const AddModal = ({ open, handleClose, handleSave }) => {
                     name="TrainingType"
                     value={newEmployee.TrainingType}
                     onChange={handleChange}
+                    label="Training Type"
                   >
                     <MenuItem value="Self">Self</MenuItem>
                     <MenuItem value="Corporate">Corporate</MenuItem>
@@ -251,6 +261,7 @@ const AddModal = ({ open, handleClose, handleSave }) => {
                     name="Status"
                     value={newEmployee.Status}
                     onChange={handleChange}
+                    label='Status'
                   >
                     <MenuItem value="Open">Open</MenuItem>
                     <MenuItem value="In Progress">In Progress</MenuItem>
@@ -275,7 +286,7 @@ const AddModal = ({ open, handleClose, handleSave }) => {
             <Box
               sx={{ mt: 2, display: "flex", gap: 2, justifyContent: "right" }}
             >
-              <Button type="submit" variant="contained" color="primary">
+              <Button disabled={Object.values(errors).some((error) => error)} type="submit" variant="contained" color="primary">
                 Save
               </Button>
               <Button

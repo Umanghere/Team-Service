@@ -32,6 +32,7 @@ import { saveAs } from "file-saver";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { useAuth } from "../../../context/AuthContext";
+import { ToastContainer, toast } from "react-toastify";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -160,7 +161,7 @@ export default function TrainingTable() {
   useEffect(() => {
     axios
       // .get("https://jsonserver-2xm2.onrender.com/trainingData")
-      .get("http://localhost:5000/trainingData")
+      .get("https://teamservicesbackend.up.railway.app/trainingData")
       .then((response) => {
         setTrainingData(response.data);
       })
@@ -180,9 +181,12 @@ export default function TrainingTable() {
       alert("Something went wrong. Please refresh and try again.");
       return;
     }
-  
+
     axios
-      .put(`http://localhost:5000/trainingData/${updatedEmployee._id}`, updatedEmployee)
+      .put(
+        `https://teamservicesbackend.up.railway.app/trainingData/${updatedEmployee._id}`,
+        updatedEmployee
+      )
       .then((response) => {
         setTrainingData((prevData) =>
           prevData.map((emp) =>
@@ -190,13 +194,22 @@ export default function TrainingTable() {
           )
         );
         handleCloseModal();
+        toast.success("Updated Successfully", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
       })
       .catch((error) => {
         console.error("Error updating data: ", error);
         alert("Failed to update employee. Please try again.");
       });
   };
-  
 
   const handleCloseModal = () => {
     setEditModalOpen(false);
@@ -209,7 +222,7 @@ export default function TrainingTable() {
 
   const handleAddSave = async (newEmployee) => {
     try {
-      const response = await fetch("http://localhost:5000/trainingData", {
+      const response = await fetch("https://teamservicesbackend.up.railway.app/trainingData", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -224,12 +237,21 @@ export default function TrainingTable() {
       const addedTraining = await response.json();
       setTrainingData((prevData) => [...prevData, addedTraining]); // Update frontend state
       handleAddClose(); // Close modal after successful save
+      toast.success("Training Added Successfully", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     } catch (error) {
       console.error("Error adding training data:", error);
       alert("Failed to add training data. Please try again.");
     }
   };
-
 
   const handleAddClose = () => {
     setAddModalOpen(false);
@@ -256,8 +278,8 @@ export default function TrainingTable() {
       bookType: "xlsx",
       type: "array",
     });
-    const blob = new Blob([excelBuffer], { 
-      type: "application/octet-stream" 
+    const blob = new Blob([excelBuffer], {
+      type: "application/octet-stream",
     });
     saveAs(blob, "training_data.xlsx");
   };
@@ -304,191 +326,231 @@ export default function TrainingTable() {
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredData.length) : 0;
 
   return (
-    <Box sx={{ paddingRight: 10, paddingLeft: 10 }}>
-      <AppBar
-        position="static"
-        sx={{ backgroundColor: "var(--lt-color-gray-400)" }}
-      >
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search…"
-              inputProps={{ "aria-label": "search", style: { color: "black" } }}
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-          </Search>
-
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            {(userRole === "admin" || userRole === "manager") && (
-              <>
-                <Tooltip title="Add Employee">
-                  <IconButton
-                    onClick={handleAdd}
-                    sx={{
-                      backgroundColor: "blue",
-                      color: "white",
-                      "&:hover": { backgroundColor: "darkblue" },
-                      marginRight: "8px", // Space between Add and Download
-                    }}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </Tooltip>
-              </>
-            )}
-            <Tooltip title="Download Employee List">
-              <IconButton
-                onClick={handleDownload}
-                sx={{
-                  backgroundColor: "green",
-                  color: "white",
-                  "&:hover": { backgroundColor: "darkgreen" },
-                }}
-              >
-                <DownloadIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
-          <TableHead>
-            <TableRow>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Name</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Training Title</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Training Type</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Mode</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Planned Date</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Start Date</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>End Date</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Status</TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {(rowsPerPage > 0
-              ? filteredData.slice(
-                  page * rowsPerPage,
-                  page * rowsPerPage + rowsPerPage
-                )
-              : filteredData
-            ).map((row) => (
-              <TableRow key={row.id}>
-                <TableCell align="center" >
-                  {row.Name}
-                </TableCell>
-                {/* <TableCell>{row.TrainingTitle}</TableCell> */}
-                <TableCell align="center">
-                  {row.TrainingTitle.split(",").map((title, index) => (
-                    <div key={index}>{title.trim()}</div>
-                  ))}
-                </TableCell>
-
-                <TableCell align="center">{row.TrainingType}</TableCell>
-                <TableCell align="center">{row.Mode}</TableCell>
-                <TableCell align="center">{formatDate(row.PlannedDate)}</TableCell>
-                <TableCell align="center">{formatDate(row.StartDate)}</TableCell>
-                <TableCell align="center">{formatDate(row.EndDate)}</TableCell>
-                <TableCell align="center">{row.Status}</TableCell>
-                <TableCell align="center">
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    {/* EDIT BUTTON */}
-                    <Tooltip title="Edit Employee List">
-                      <IconButton
-                        sx={{
-                          color: "blue",
-                          "&:hover": { color: "darkblue" },
-                        }}
-                        onClick={() => handleEdit(row)}
-                        disabled={
-                          userRole === "viewer" && !row.Name.includes(userName)
-                        }
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-
-                    {/* DELETE BUTTON - Hidden for Viewers */}
-                    <Tooltip title="Copy Employee Details">
-                      <IconButton
-                        sx={{
-                          color: "green",
-                          "&:hover": { color: "darkgreen" },
-                        }}
-                        onClick={() => handleCopy(row)}
-                      >
-                        <ContentCopyIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
-            {emptyRows > 0 && (
-              <TableRow style={{ height: 53 * emptyRows }}>
-                <TableCell colSpan={9} />
-              </TableRow>
-            )}
-          </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-                colSpan={9}
-                count={filteredData.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                slotProps={{
-                  select: {
-                    inputProps: {
-                      "aria-label": "rows per page",
-                    },
-                    native: true,
-                  },
-                }}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                ActionsComponent={TablePaginationActions}
-              />
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </TableContainer>
-      {/* Edit Modal */}
-      {editModalOpen && (
-        <EditModal
-          open={editModalOpen}
-          handleClose={handleCloseModal}
-          employeeData={editData}
-          handleSave={handleSave}
-        />
-      )}
-      {/* add modal */}
-      <AddModal
-        open={addModalOpen}
-        handleClose={handleAddClose}
-        handleSave={handleAddSave}
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
       />
-
-      <Snackbar
-        open={copySuccess}
-        autoHideDuration={3000}
-        onClose={() => setCopySuccess(false)}
-      >
-        <Alert
-          onClose={() => setCopySuccess(false)}
-          severity="success"
-          sx={{ width: "100%" }}
+      <Box sx={{ paddingRight: 10, paddingLeft: 10 }}>
+        <AppBar
+          position="static"
+          sx={{ backgroundColor: "var(--lt-color-gray-400)" }}
         >
-          {copyMessage}
-        </Alert>
-      </Snackbar>
-    </Box>
+          <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Search>
+              <SearchIconWrapper>
+                <SearchIcon />
+              </SearchIconWrapper>
+              <StyledInputBase
+                placeholder="Search…"
+                inputProps={{
+                  "aria-label": "search",
+                  style: { color: "black" },
+                }}
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </Search>
+
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              {(userRole === "admin" || userRole === "manager") && (
+                <>
+                  <Tooltip title="Add Employee">
+                    <IconButton
+                      onClick={handleAdd}
+                      sx={{
+                        backgroundColor: "blue",
+                        color: "white",
+                        "&:hover": { backgroundColor: "darkblue" },
+                        marginRight: "8px", // Space between Add and Download
+                      }}
+                    >
+                      <AddIcon />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
+              <Tooltip title="Download Employee List">
+                <IconButton
+                  onClick={handleDownload}
+                  sx={{
+                    backgroundColor: "green",
+                    color: "white",
+                    "&:hover": { backgroundColor: "darkgreen" },
+                  }}
+                >
+                  <DownloadIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Toolbar>
+        </AppBar>
+
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
+            <TableHead>
+              <TableRow>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Name
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Training Title
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Training Type
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Mode
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Planned Date
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Start Date
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  End Date
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Status
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {(rowsPerPage > 0
+                ? filteredData.slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                : filteredData
+              ).map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell align="center">{row.Name}</TableCell>
+                  {/* <TableCell>{row.TrainingTitle}</TableCell> */}
+                  <TableCell align="center">
+                    {row.TrainingTitle.split(",").map((title, index) => (
+                      <div key={index}>{title.trim()}</div>
+                    ))}
+                  </TableCell>
+
+                  <TableCell align="center">{row.TrainingType}</TableCell>
+                  <TableCell align="center">{row.Mode}</TableCell>
+                  <TableCell align="center">
+                    {formatDate(row.PlannedDate)}
+                  </TableCell>
+                  <TableCell align="center">
+                    {formatDate(row.StartDate)}
+                  </TableCell>
+                  <TableCell align="center">
+                    {formatDate(row.EndDate)}
+                  </TableCell>
+                  <TableCell align="center">{row.Status}</TableCell>
+                  <TableCell align="center">
+                    <Box sx={{ display: "flex", justifyContent: "center", gap:"0.3rem" }}>
+                      {/* EDIT BUTTON */}
+                      <Tooltip title="Edit Employee List">
+                        <IconButton
+                          sx={{
+                            color: "blue",
+                            "&:hover": { color: "darkblue" },
+                          }}
+                          onClick={() => handleEdit(row)}
+                          disabled={
+                            userRole === "viewer" &&
+                            !row.Name.includes(userName)
+                          }
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+
+                      {/* DELETE BUTTON - Hidden for Viewers */}
+                      <Tooltip title="Copy Employee Details">
+                        <IconButton
+                          sx={{
+                            color: "green",
+                            "&:hover": { color: "darkgreen" },
+                          }}
+                          onClick={() => handleCopy(row)}
+                        >
+                          <ContentCopyIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {emptyRows > 0 && (
+                <TableRow style={{ height: 53 * emptyRows }}>
+                  <TableCell colSpan={9} />
+                </TableRow>
+              )}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={9}
+                  count={filteredData.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  slotProps={{
+                    select: {
+                      inputProps: {
+                        "aria-label": "rows per page",
+                      },
+                      native: true,
+                    },
+                  }}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  ActionsComponent={TablePaginationActions}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </TableContainer>
+        {/* Edit Modal */}
+        {editModalOpen && (
+          <EditModal
+            open={editModalOpen}
+            handleClose={handleCloseModal}
+            employeeData={editData}
+            handleSave={handleSave}
+          />
+        )}
+        {/* add modal */}
+        <AddModal
+          open={addModalOpen}
+          handleClose={handleAddClose}
+          handleSave={handleAddSave}
+        />
+
+        <Snackbar
+          open={copySuccess}
+          autoHideDuration={3000}
+          onClose={() => setCopySuccess(false)}
+        >
+          <Alert
+            onClose={() => setCopySuccess(false)}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            {copyMessage}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </>
   );
 }

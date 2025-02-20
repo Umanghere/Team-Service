@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { ToastContainer, toast } from "react-toastify";
 import PropTypes from "prop-types";
 
 const style = {
@@ -78,19 +77,6 @@ const EditModal = ({ open, handleClose, handleSave, employeeData }) => {
 
   return (
     <>
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition={Bounce}
-      />
       <Modal
         open={open}
         onClose={handleClose}
@@ -169,6 +155,7 @@ const EditModal = ({ open, handleClose, handleSave, employeeData }) => {
                     onChange={handleChange}
                     fullWidth
                     margin="normal"
+                    label="Training Type"
                   >
                     <MenuItem value="Self">Self</MenuItem>
                     <MenuItem value="Corporate">Corporate</MenuItem>
@@ -183,6 +170,7 @@ const EditModal = ({ open, handleClose, handleSave, employeeData }) => {
                     name="Mode"
                     value={formData.Mode || ""}
                     onChange={handleChange}
+                    label="Mode"
                   >
                     <MenuItem value="online">online</MenuItem>
                     <MenuItem value="offline">offline</MenuItem>
@@ -197,6 +185,7 @@ const EditModal = ({ open, handleClose, handleSave, employeeData }) => {
                     name="Status"
                     value={formData.Status || ""}
                     onChange={handleChange}
+                    label="Status"
                   >
                     <MenuItem value="Open">Open</MenuItem>
                     <MenuItem value="In Progress">In Progress</MenuItem>

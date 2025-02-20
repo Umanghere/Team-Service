@@ -20,7 +20,7 @@ const Cards = () => {
   const [viewerTrainingsThisWeek, setViewerTrainingsThisWeek] = useState(0);
 
 
-                                                    // Debugging
+  // =======================================================================  Debugging
   // console.log("userName:", userName);
   // console.log("UserEmpId:", UserEmpId);
 
@@ -32,7 +32,7 @@ const Cards = () => {
   const fetchEmployeesData = () => {
     axios
       // .get("https://jsonserver-2xm2.onrender.com/employeesData")
-      .get("http://localhost:5000/employeesData")
+      .get("https://teamservicesbackend.up.railway.app/employeesData")
       .then((response) => {
         setEmployeesData(response.data);
         setTeamMemberCount(response.data.length);
@@ -51,7 +51,7 @@ const Cards = () => {
   const fetchTrainingData = () => {
     axios
       // .get("https://jsonserver-2xm2.onrender.com/trainingData")
-      .get("http://localhost:5000/trainingData")
+      .get("https://teamservicesbackend.up.railway.app/trainingData")
       .then((response) => {
         calculateTrainingData(response.data);
       })
