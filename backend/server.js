@@ -333,22 +333,18 @@ const Training = require('./models/TrainingData'); // Ensure the correct path
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173",  // Local development
-  "https://team-services.vercel.app/"  // Future deployed frontend
-];
-
-// Middleware
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  }
-}));
 app.use(express.json());
+
+app.use(cors({
+  origin: [
+    "http://localhost:5173",  // Local Development
+    "http://localhost:4173",  // Preview Build
+    "https://team-services.vercel.app"  // Deployed frontend
+  ],
+  credentials: true,  // Allows cookies, authorization headers
+  methods: ["GET", "POST", "PUT", "DELETE"],  // Allowed HTTP methods
+}));
+
 
 // Connect to MongoDB
 // let urlLocal = 'mongodb://localhost:27017/Team-Services';
