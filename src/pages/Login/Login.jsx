@@ -74,7 +74,7 @@ const Login = () => {
               required
             />
             <button
-              type="button"
+              type="button"ad
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-10 text-gray-400 hover:text-white hover:duration-200"
             >
