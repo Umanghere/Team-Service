@@ -4,7 +4,7 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-  base: "./",  // ✅ Ensures correct asset paths
+  base: "/Team-Service-UI/login", // ← Fix this line
   resolve: {
     alias: {
       'date-fns/_lib/format/longFormatters': path.resolve(__dirname, 'node_modules/date-fns/_lib/format/longFormatters'),
@@ -12,10 +12,5 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['date-fns']
-  },
-  build: {
-    outDir: "dist",
-    assetsDir: "assets",
-    emptyOutDir: true,
   }
 })
