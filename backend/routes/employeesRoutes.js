@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Employee = require('../models/EmployeesData');
+const Employee = require('../models/EmployeesData.js');
 const mongoose = require('mongoose');
 
 // Fetch all employees

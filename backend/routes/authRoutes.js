@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require('./userRoutes'); // Adjust the path if needed
+const User = require('../models/User.js'); // Adjust the path if needed
 
 // Login Route
 router.post('/login', async (req, res) => {
