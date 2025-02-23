@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Training = require('../models/TrainingData.js');
+const Training = require('../models/TrainingData');
 const mongoose = require('mongoose');
 
 // Fetch all training data

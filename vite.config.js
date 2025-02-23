@@ -4,7 +4,7 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-  base: "/Team-Service-UI/login", // ← Fix this line
+  base: "/Team-Service/login", 
   resolve: {
     alias: {
       'date-fns/_lib/format/longFormatters': path.resolve(__dirname, 'node_modules/date-fns/_lib/format/longFormatters'),
