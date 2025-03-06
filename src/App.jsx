@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
-import LoadingScreen from './components/components/LoadingScreen';
+import LoadingScreen from './components/components/LoadingScreen/Loadingscreen';
 
 // Lazy load the modules
 const Login = lazy(() => import('./pages/Login/Login'));
@@ -14,7 +14,7 @@ const RootLayout = lazy(() => import('./pages/Root/Root'));
 
 const App = () => {
   return (
-    <Suspense fallback={<LoadingScreen />}>
+    <Suspense fallback={<LoadingScreen/>}>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route
