@@ -12,5 +12,8 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['date-fns']
+  },
+  css:{
+    devSourcemap: true,
   }
 })

@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
     setUserRole(""); // Clear user role on logout
     setUserName(""); // Clear user name on logout
     setUserEmpId(""); // Clear user EmpId on logout
-    navigate("/Team-Service-UI/login", { replace: true });
+    navigate("/", { replace: true });
   };
 
   return (
