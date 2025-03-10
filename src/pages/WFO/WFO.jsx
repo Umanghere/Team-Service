@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useLocation } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import "./WFO.module.css";
+import styles from "./WFO.module.css";
 
 function CalendarTable() {
   const { userRole, userEmail } = useAuth();
@@ -257,12 +257,12 @@ function CalendarTable() {
 
   return (
     <>
-      <div className="max-w-full overflow-hidden">
-        <div className="border-2 rounded-md bg-gray-50 py-4 m-8 flex flex-col justify-center items-center gap-4">
-          <div className="flex items-center gap-8 mb-4">
-            <div className="flex justify-center items-center gap-3">
+      <div className={styles["max-w-full overflow-hidden"]}>
+        <div className={styles["border-2 rounded-md bg-gray-50 py-4 m-8 flex flex-col justify-center items-center gap-4"]}>
+          <div className={styles["flex items-center gap-8 mb-4"]}>
+            <div className={styles["flex justify-center items-center gap-3"]}>
               {/* Forecast Month */}
-              <label htmlFor="monthSelector" className="text-lg">
+              <label htmlFor="monthSelector" className={styles["text-lg"]}>
                 Forecast Month:
               </label>
 
@@ -271,7 +271,7 @@ function CalendarTable() {
                 type="month"
                 id="monthSelector"
                 name="monthSelector"
-                className="border-spacing-4 border-2 border-gray-500 rounded-md p-1 text-lg"
+                className={styles["border-spacing-4 border-2 border-gray-500 rounded-md p-1 text-lg"]}
                 value={selectedMonth.toISOString().slice(0, 7)}
                 onChange={handleMonthChange}
               />
@@ -279,11 +279,11 @@ function CalendarTable() {
 
             {/* Conditionally render WFO preferences */}
             {userRole === "viewer" && (
-              <div className="flex items-center gap-4">
+              <div className={styles["flex items-center gap-4"]}>
                 {/* WFO Preferences */}
-                <label className="text-lg">WFO preferences:</label>
+                <label className={styles["text-lg"]}>WFO preferences:</label>
                 {["Mon", "Tue", "Wed", "Thu", "Fri"].map((day) => (
-                  <label key={day} className="text-lg">
+                  <label key={day} className={styles["text-lg"]}>
                     <input
                       type="checkbox"
                       name={day}
@@ -296,7 +296,7 @@ function CalendarTable() {
 
                 <button
                   onClick={handleApply}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
+                  className={styles["px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"]}
                 >
                   Apply
                 </button>
@@ -304,7 +304,7 @@ function CalendarTable() {
                 {/* Save Button */}
                 <button
                   onClick={handleSave}
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200"
+                  className={styles["px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200"]}
                 >
                   Save
                 </button>
@@ -313,13 +313,13 @@ function CalendarTable() {
           </div>
 
           {/* Display the number of days in the selected month */}
-          <div className="flex justify-center w-full px-8">
-            <div className="overflow-x-auto w-full bg-white">
+          <div className={styles["flex justify-center w-full px-8"]}>
+            <div className={styles["overflow-x-auto w-full bg-white"]}>
               {
-                <table className="min-w-max">
+                <table className={styles["min-w-max"]}>
                   <thead>
                     <tr>
-                      <th rowSpan="2" className="px-6">
+                      <th rowSpan="2" className={styles["px-6"]}>
                         Name
                       </th>
                       {Array.from({ length: daysInSelectedMonth }, (_, i) => (
@@ -345,7 +345,7 @@ function CalendarTable() {
                   </thead>
                   <tbody>
                     <tr>
-                      <td className="px-6">{userNameAndId}</td>
+                      <td className={styles["px-6"]}>{userNameAndId}</td>
                       {Array.from({ length: daysInSelectedMonth }, (_, i) => {
                         const day = i + 1;
                         const currentDate = new Date(
@@ -356,13 +356,13 @@ function CalendarTable() {
                         return (
                           <td key={day} onClick={() => handleCellClick(day)}>
                             {isWeekend(currentDate) ? (
-                              <button className="weekend">😊</button>
+                              <button className={styles["weekend"]}>😊</button>
                             ) : cellStates[day] === "O" ? (
-                              <button className="O">O</button>
+                              <button className={styles.O}>O</button>
                             ) : cellStates[day] === "H" ? (
-                              <button className="H">H</button>
+                              <button className={styles.H}>H</button>
                             ) : (
-                              <button className="L">L</button>
+                              <button className={styles.L}>L</button>
                             )}
                           </td>
                         );
@@ -382,24 +382,24 @@ function CalendarTable() {
       <div>
         {userRole === "viewer" ? (
           <div
-            className="ms-5 text-primary e-4 mt-2 fst-italic"
+            className={styles["ms-5 text-primary e-4 mt-2 fst-italic"]}
             style={{ textAlign: "left" }}
           >
             <i
-              className="fa-solid fa-circle-info me-2"
+              className={styles["fa-solid fa-circle-info me-2"]}
               style={{ color: "orange" }}
             ></i>
-            <span className="text-primary">
+            <span className={styles["text-primary"]}>
               Click on a cell to change forecast of current and future dates
             </span>
           </div>
         ) : userRole !== "viewer" ? (
           <div>
             <i
-              className="fa-solid fa-circle-info me-2 ms-4 mt-2"
+              className={styles["fa-solid fa-circle-info me-2 ms-4 mt-2"]}
               style={{ color: "orange" }}
             ></i>
-            <span className="text-primary">
+            <span className={styles["text-primary"]}>
               Click on a cell to change forecast
             </span>
           </div>

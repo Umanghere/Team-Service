@@ -18,6 +18,7 @@ const Login = () => {
     setLoading(true);
 
     try {
+      // const response = await fetch("https://teamservicesbackend.up.railway.app/login", {
       const response = await fetch("https://teamservicesbackend.up.railway.app/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
