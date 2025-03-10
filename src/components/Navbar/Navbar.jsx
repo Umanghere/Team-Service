@@ -24,8 +24,10 @@ const Navbar = () => {
               <div className='text-lg'>{userEmail}</div>
               <div className='text-sm'>({userRole})</div>
             </div>
-            <div onClick={logout} className="scale-110 flex items-center justify-center cursor-pointer hover:text-gray-100 hover:scale-125 transition-colors,transform duration-200">
-              <i className="fa-solid fa-right-from-bracket"></i>
+            <div 
+              onClick={logout} 
+              className="scale-110 flex items-center justify-center cursor-pointer hover:text-gray-100 hover:scale-125 transition-colors,transform duration-200">
+                <i className="fa-solid fa-right-from-bracket"></i>
             </div>
           </div>
         </div>

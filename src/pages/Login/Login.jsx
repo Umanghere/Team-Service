@@ -8,15 +8,17 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleLogin = async (event) => {
     event.preventDefault();
     setError(null);
+    setLoading(true);
 
     try {
-      const response = await fetch("https://teamservicesbackend.up.railway.app/login", {
+      const response = await fetch("https://teamservicesbackend.up.railway.app/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -30,8 +32,12 @@ const Login = () => {
 
       login(data.email, data.role);
       navigate("/Team-Service-UI/", { replace: true });
-    } catch (error) {
+    } 
+    catch (error) {
       setError(error.message);
+    } 
+    finally {
+      setLoading(false);
     }
   };
 
@@ -82,10 +88,11 @@ const Login = () => {
             </button>
           </div>
           <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-bold py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg "
+            type="submit" disabled={loading}
+            className={`w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg 
+              ${loading ? "opacity-50 cursor-not-allowed" : "hover:from-blue-600 hover:to-indigo-600"}`}
           >
-            Sign In
+            {loading ? "Signing In..." : "Sign In"}
           </button>
         </form>
       </div>

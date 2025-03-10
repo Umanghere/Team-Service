@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useLocation } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import "./WFO.css";
+import "./WFO.module.css";
 
 function CalendarTable() {
   const { userRole, userEmail } = useAuth();
@@ -29,18 +29,17 @@ function CalendarTable() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
-
-  // useEffect(() => {
-  //   axios
-  //     .get(`http://localhost:5000/users?email=${userEmail}`)
-  //     .then((response) => {
-  //       const user = response.data[0];
-  //       if (user) {
-  //         setUserNameAndId(`${user.Name}(${user.EmpId})`);
-  //       }
-  //     })
-  //     .catch((error) => console.error("Error fetching user data:", error));
-  // }, [userEmail]);
+  useEffect(() => {
+    axios
+      .get(`http://localhost:8000/users?email=${userEmail}`)
+      .then((response) => {
+        const user = response.data[0];
+        if (user) {
+          setUserNameAndId(`${user.Name}(${user.EmpId})`);
+        }
+      })
+      .catch((error) => console.error("Error fetching user data:", error));
+  }, [userEmail]);
 
   useEffect(() => {
     updateDaysInMonth(selectedMonth);
@@ -158,7 +157,7 @@ function CalendarTable() {
     ).padStart(2, "0")}`;
     axios
       .get(
-        `https://teamservicesbackend.up.railway.app/employeeAttendances?name=${encodeURIComponent(
+        `http://localhost:8000/employeeAttendances?name=${encodeURIComponent(
           userNameAndId
         )}&month=${monthYear}`
       )
@@ -180,35 +179,77 @@ function CalendarTable() {
       .catch((error) => console.error("Error fetching preferences:", error));
   };
 
-  const handleSave = async () => {
-  try {
-    const response = await fetch('https://teamservicesbackend.up.railway.app/attendanceData', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id: uniqueAttendanceId,   // Ensure this ID exists
-        name: employeeName,
-        month: selectedMonth,
-        values: updatedAttendanceValues,  
-        TH: totalHours,
-        TL: totalLeaves,
-      }),
-    });
+  const handleSave = () => {
+    const monthYear = `${selectedMonth.getFullYear()}-${String(
+      selectedMonth.getMonth() + 1
+    ).padStart(2, "0")}`;
+    const data = {
+      month: monthYear,
+      name: userNameAndId,
+      values: Object.keys(cellStates).map((day) => ({
+        [`${selectedMonth.getFullYear()}-${String(
+          selectedMonth.getMonth() + 1
+        ).padStart(2, "0")}-${String(day).padStart(2, "0")}`]: cellStates[day],
+      })),
+      TO: toCount,
+      TH: thCount,
+      TL: tlCount,
+    };
 
-    const data = await response.json();
-    if (response.ok) {
-      alert('Attendance saved successfully!');
-    } else {
-      console.error('Error:', data.message);
-      alert('Failed to save attendance.');
-    }
-  } catch (error) {
-    console.error('Error saving attendance:', error);
-  }
-};
-
+    axios
+      .get(
+        `http://localhost:8000/employeeAttendances?name=${encodeURIComponent(
+          userNameAndId
+        )}&month=${monthYear}`
+      )
+      .then((response) => {
+        const existingData = response.data[0];
+        if (existingData) {
+          axios
+            .put(
+              `http://localhost:8000/employeeAttendances/${existingData.id}`,
+              data
+            )
+            .then(() => {
+              setSnackbarMessage(
+                `Attendance updated successfully for ${userNameAndId}`
+              );
+              setSnackbarSeverity("success");
+              setSnackbarOpen(true);
+              console.log("Preferences updated successfully");
+            })
+            .catch((error) => {
+              setSnackbarMessage("Error updating preferences");
+              setSnackbarSeverity("error");
+              setSnackbarOpen(true);
+              console.error("Error updating preferences:", error);
+            });
+        } else {
+          axios
+            .post("http://localhost:8000/employeeAttendances", data)
+            .then(() => {
+              setSnackbarMessage(
+                `Attendance saved successfully for ${userNameAndId}`
+              );
+              setSnackbarSeverity("success");
+              setSnackbarOpen(true);
+              console.log("Preferences saved successfully");
+            })
+            .catch((error) => {
+              setSnackbarMessage("Error saving preferences");
+              setSnackbarSeverity("error");
+              setSnackbarOpen(true);
+              console.error("Error saving preferences:", error);
+            });
+        }
+      })
+      .catch((error) => {
+        setSnackbarMessage("Error fetching existing data");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        console.error("Error fetching existing data:", error);
+      });
+  };
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -381,4 +422,4 @@ function CalendarTable() {
   );
 }
 
-export default CalendarTable;
+export default CalendarTable; 

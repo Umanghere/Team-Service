@@ -1,9 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const User = require('../models/User'); // Adjust the path if needed
+const User = require("../models/User"); // Ensure the correct path
 
-// Login Route
-router.post('/login', async (req, res) => {
+// Login route
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -23,7 +23,6 @@ router.post('/login', async (req, res) => {
       Name: user.Name,
       EmpId: user.EmpId
     });
-
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Server error" });
