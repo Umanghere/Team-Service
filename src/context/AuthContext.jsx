@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       // const response = await fetch("https://jsonserver-2xm2.onrender.com/users");
-      const response = await fetch("https://teamservicesbackend.up.railway.app/users");
+      const response = await fetch("https://teamservices-backend.onrender.com/users");
       const users = await response.json();
 
       // Find the user based on the email

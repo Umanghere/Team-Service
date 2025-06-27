@@ -161,7 +161,7 @@ export default function TrainingTable() {
   useEffect(() => {
     axios
       // .get("https://jsonserver-2xm2.onrender.com/trainingData")
-      .get("https://teamservicesbackend.up.railway.app/trainingData")
+      .get("https://teamservices-backend.onrender.com/trainingData")
       .then((response) => {
         setTrainingData(response.data);
       })

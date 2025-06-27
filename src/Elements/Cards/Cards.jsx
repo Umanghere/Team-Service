@@ -1,260 +1,131 @@
-
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import Card from "@mui/material/Card";
-import { useMediaQuery } from "@mui/material";
-import { useAuth } from "../../context/AuthContext";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const Cards = () => {
-  const { userRole, userName, UserEmpId } = useAuth(); // Retrieve user role from AuthContext
-  const isSmallScreen = useMediaQuery("(max-width:600px)");
-  const isMediumScreen = useMediaQuery("(max-width:960px)");
-  const isLargeScreen = useMediaQuery("(max-width:2000px)");
-
-  const [employeesData, setEmployeesData] = useState([]);
-  const [teamMemberCount, setTeamMemberCount] = useState(0);
-  const [uniqueProjectCount, setUniqueProjectCount] = useState(0);
-  const [trainingsToday, setTrainingsToday] = useState(0);
-  const [trainingsThisWeek, setTrainingsThisWeek] = useState(0);
-  const [viewerTrainingsToday, setViewerTrainingsToday] = useState(0);
-  const [viewerTrainingsThisWeek, setViewerTrainingsThisWeek] = useState(0);
-
-
-  // =======================================================================  Debugging
-  // console.log("userName:", userName);
-  // console.log("UserEmpId:", UserEmpId);
+  const [teamData, setTeamData] = useState({
+    totalEmployees: 0,
+    presentEmployees: 0,
+    onLeave: 0,
+    trainingCompleted: 0
+  });
 
   useEffect(() => {
-    fetchEmployeesData();
-    fetchTrainingData();
+    // Fetch employees data
+    axios.get("https://teamservices-backend.onrender.com/employeesData")
+      .then(response => {
+        setTeamData(prevData => ({
+          ...prevData,
+          totalEmployees: response.data.length
+        }));
+      })
+      .catch(error => {
+        console.error("Error fetching employees data:", error);
+      });
+
+    // Fetch attendance data
+    axios.get("https://teamservicesbackend.up.railway.app/attendanceData")
+      .then(response => {
+        // Calculate present and leave counts
+        const today = new Date().toISOString().split('T')[0];
+        const todayAttendance = response.data.filter(item => item.date === today);
+        
+        if (todayAttendance.length > 0) {
+          const presentCount = todayAttendance.filter(item => item.status === 'present').length;
+          const leaveCount = todayAttendance.filter(item => item.status === 'leave').length;
+          
+          setTeamData(prevData => ({
+            ...prevData,
+            presentEmployees: presentCount,
+            onLeave: leaveCount
+          }));
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching attendance data:", error);
+      });
+    
+    // Fetch training data
+    axios.get("https://teamservicesbackend.up.railway.app/trainingData")
+      .then(response => {
+        const completedTrainings = response.data.filter(item => 
+          item.status === 'completed' || item.status === 'Completed'
+        ).length;
+        
+        setTeamData(prevData => ({
+          ...prevData,
+          trainingCompleted: completedTrainings
+        }));
+      })
+      .catch(error => {
+        console.error("Error fetching training data:", error);
+      });
   }, []);
 
-  const fetchEmployeesData = () => {
-    axios
-      // .get("https://jsonserver-2xm2.onrender.com/employeesData")
-      .get("https://teamservicesbackend.up.railway.app/employeesData")
-      .then((response) => {
-        setEmployeesData(response.data);
-        setTeamMemberCount(response.data.length);
-        calculateUniqueProjects(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data: ", error);
-      });
-  };
-
-  const calculateUniqueProjects = (data) => {
-    const uniqueProjects = new Set(data.map((employee) => employee.Project));
-    setUniqueProjectCount(uniqueProjects.size);
-  };
-
-  const fetchTrainingData = () => {
-    axios
-      // .get("https://jsonserver-2xm2.onrender.com/trainingData")
-      .get("https://teamservicesbackend.up.railway.app/trainingData")
-      .then((response) => {
-        calculateTrainingData(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching training data: ", error);
-      });
-  };
-
-  const calculateTrainingData = (data) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize today's date to midnight
-  
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
-  
-    const endOfWeek = new Date(today);
-    endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
-    endOfWeek.setHours(23, 59, 59, 999); // Set end of the week to last millisecond
-  
-    let totalTrainingsTodayCount = 0;
-    let totalTrainingsThisWeekCount = 0;
-    let viewerTrainingsTodayCount = 0;
-    let viewerTrainingsThisWeekCount = 0;
-  
-    data.forEach((training) => {
-      const plannedDate = new Date(training.PlannedDate);
-      const startDate = new Date(training.StartDate);
-      const endDate = new Date(training.EndDate);
-      const title = training.TrainingTitle.trim();
-  
-      const namePart = training.Name.split("(")[0].trim();
-      const isUserTraining = namePart === userName.trim();
-  
-      // Check if the training is planned for today or ongoing
-      const isTrainingToday =
-        plannedDate.toDateString() === today.toDateString() &&
-        (today >= startDate && today <= endDate);
-  
-      // Check if the training falls within this week
-      const isTrainingThisWeek =
-        (startDate >= startOfWeek && startDate <= endOfWeek) ||
-        (plannedDate >= startOfWeek && plannedDate <= endOfWeek) ||
-        (endDate >= startOfWeek && endDate <= endOfWeek);
-  
-      if (isTrainingToday) {
-        if (userRole === "viewer" && isUserTraining) {
-          viewerTrainingsTodayCount += title.includes(",")
-            ? title.split(",").length
-            : 1;
-        } else if (userRole !== "viewer") {
-          totalTrainingsTodayCount += title.includes(",")
-            ? title.split(",").length
-            : 1;
-        }
-      }
-  
-      if (isTrainingThisWeek) {
-        if (userRole === "viewer" && isUserTraining) {
-          viewerTrainingsThisWeekCount += title.includes(",")
-            ? title.split(",").length
-            : 1;
-        } else if (userRole !== "viewer") {
-          totalTrainingsThisWeekCount += title.includes(",")
-            ? title.split(",").length
-            : 1;
-        }
-      }
-    });
-  
-
-    //--------------------------------------------------------------------------------------------- Debugging
-      // console.log(
-      //   "Trainings Today:",
-      //   totalTrainingsTodayCount,
-      //   "Trainings This Week:",
-      //   totalTrainingsThisWeekCount
-      // );
-      // console.log(
-      //   "Viewer Trainings Today:",
-      //   viewerTrainingsTodayCount,
-      //   "Viewer Trainings This Week:",
-      //   viewerTrainingsThisWeekCount
-      // );
-    
-    
-    setTrainingsToday(totalTrainingsTodayCount);
-    setTrainingsThisWeek(totalTrainingsThisWeekCount);
-    setViewerTrainingsToday(viewerTrainingsTodayCount);
-    setViewerTrainingsThisWeek(viewerTrainingsThisWeekCount);
-  };
-  
-
-
-
-  const getCardStyle = () => {
-    if (isSmallScreen) {
-      return {
-        width: "80%",
-        height: "15vh",
-      };
-    } else if (isMediumScreen) {
-      return {
-        width: "45%",
-        height: "19vh",
-      };
-    } else if (isLargeScreen) {
-      return {
-        width: "20vw",
-        height: "200px",
-      };
+  const cards = [
+    {
+      title: "Total Employees",
+      value: teamData.totalEmployees,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ),
+      bgColor: "from-blue-500 to-blue-600",
+      textColor: "text-blue-100"
+    },
+    {
+      title: "Present Today",
+      value: teamData.presentEmployees,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      bgColor: "from-green-500 to-green-600",
+      textColor: "text-green-100"
+    },
+    {
+      title: "On Leave",
+      value: teamData.onLeave,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+      bgColor: "from-yellow-500 to-yellow-600",
+      textColor: "text-yellow-100"
+    },
+    {
+      title: "Trainings Completed",
+      value: teamData.trainingCompleted,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+      ),
+      bgColor: "from-purple-500 to-purple-600",
+      textColor: "text-purple-100"
     }
-  };
-
-  const getTextStyle = () => {
-    if (isSmallScreen) {
-      return {
-        titleFontSize: "2rem",
-        contentFontSize: "1.5rem",
-      };
-    } else if (isMediumScreen) {
-      return {
-        titleFontSize: "2.2rem",
-        contentFontSize: "1.5rem",
-      };
-    } else if (isLargeScreen) {
-      return {
-        titleFontSize: "2.5rem",
-        contentFontSize: "1.8rem",
-      };
-    }
-  };
-
-  const cardStyle = getCardStyle();
-  const textStyle = getTextStyle();
+  ];
 
   return (
-    <div className="px-4 py-4 mx-6 my-10 flex justify-center">
-      <div className="flex flex-wrap gap-4 text-3xl justify-center">
-        <Card
-          sx={{
-            ...cardStyle,
-            backgroundColor: "#3DB5A4",
-            borderRadius: "20px",
-            boxShadow: "1px 1px 10px 0.00001px gray",
-            color: "white",
-          }}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {cards.map((card, index) => (
+        <div 
+          key={index} 
+          className={`bg-gradient-to-br ${card.bgColor} rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:scale-[1.03] hover:shadow-lg`}
         >
-          <div className="flex flex-col gap-3 items-center justify-center h-full">
-            <div style={{ fontSize: "25px" }}>Team</div>
-            <div style={{ fontSize: "22px" }}>{teamMemberCount}</div>
-            <div style={{ fontSize: "25px" }}>Employee</div>
-          </div>
-        </Card>
-        <Card
-          sx={{
-            ...cardStyle,
-            backgroundColor: "#3297E4",
-            borderRadius: "20px",
-            boxShadow: "1px 1px 10px 0.00001px gray",
-            color: "white",
-          }}
-        >
-          <div className="flex flex-col gap-3 items-center justify-center h-full">
-            <div style={{ fontSize: "25px" }}>Team</div>
-            <div style={{ fontSize: "22px" }}>{uniqueProjectCount}</div>
-            <div style={{ fontSize: "25px" }}>Projects</div>
-          </div>
-        </Card>
-        <Card
-          sx={{
-            ...cardStyle,
-            backgroundColor: "#A04EDE",
-            borderRadius: "20px",
-            boxShadow: "1px 1px 10px 0.00001px gray",
-            color: "white",
-          }}
-        >
-          <div className="flex flex-col gap-3 items-center justify-center h-full">
-            <div style={{ fontSize: "25px" }}>Today</div>
-            <div style={{ fontSize: "22px" }}>0 / 0 / 0</div>
-            <div style={{ fontSize: "25px" }}>WFO/WFH/Leave</div>
-          </div>
-        </Card>
-        <Card
-          sx={{
-            ...cardStyle,
-            backgroundColor: "#E58953",
-            borderRadius: "20px",
-            boxShadow: "1px 1px 10px 0.1px gray",
-            color: "white",
-          }}
-        >
-          <div className="flex flex-col gap-3 items-center justify-center h-full">
-            <div style={{ fontSize: "25px" }}>Training</div>
-            <div style={{ fontSize: "22px" }}>
-              {userRole === "viewer"
-                ? `${viewerTrainingsToday}/${viewerTrainingsThisWeek}`
-                : `${trainingsToday} / ${trainingsThisWeek}`}
+          <div className="p-6 flex items-center justify-between">
+            <div>
+              <p className={`text-lg font-medium ${card.textColor} opacity-80`}>{card.title}</p>
+              <p className="text-4xl font-bold text-white my-6">{card.value}</p>
             </div>
-            <div style={{ fontSize: "25px" }}>Today/Week</div>
+            <div className={`${card.textColor}`}>
+              {card.icon}
+            </div>
           </div>
-        </Card>
-      </div>
+        </div>
+      ))}
     </div>
   );
 };

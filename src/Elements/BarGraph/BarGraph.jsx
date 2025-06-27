@@ -8,7 +8,7 @@ const BarGraph = () => {
 
   useEffect(() => {
     // Fetch employee data from MongoDB through the backend API
-    axios.get("https://teamservicesbackend.up.railway.app/employeesData")
+    axios.get("https://teamservices-backend.onrender.com/employeesData")
       .then((response) => {
         const employees = response.data;
         calculateGradeDistribution(employees);

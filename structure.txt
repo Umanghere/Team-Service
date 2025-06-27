@@ -1,0 +1,109 @@
+Folder PATH listing for volume Data
+Volume serial number is 3A61-62DB
+D:.
+|   .eslintrc.cjs
+|   db.json
+|   index.html
+|   package-lock.json
+|   package.json
+|   postcss.config.js
+|   README.md
+|   structure.txt
+|   tailwind.config.js
+|   vite.config.js
+|       
++---backend
+|   |   .env
+|   |   attendance.json
+|   |   employeesData.json
+|   |   package-lock.json
+|   |   package.json
+|   |   server.js
+|   |   trainingData.json
+|   |   user.json
+|   |   
+|   +---models
+|   |       AttendanceData.js
+|   |       EmployeesData.js
+|   |       TrainingData.js
+|   |       User.js
+|   |   
+|   +---routes
+|   |       authRoutes.js
+|   |       employeesRoutes.js
+|   |       trainingRoutes.js
+|   |       userRoutes.js
+|   
++---public
+|       favicon.png
+|       vite.svg
+|       _redirects
+|       
+\---src
+    |   App.css
+    |   App.jsx
+    |   index.css
+    |   main.jsx
+    |   
+    +---assets
+    |       react.png
+    |       react.svg
+    |       
+    +---components
+    |   |   ProtectedRoute.jsx
+    |   |   
+    |   +---components
+    |   |   +---TeamMembersPageComponents
+    |   |   |       AddModal.jsx
+    |   |   |       EditModal.jsx
+    |   |   |       TeamMembersTable.jsx
+    |   |   |       UploadModal.jsx
+    |   |   |       
+    |   |   \---TrainingPageComponents
+    |   |           AddModal.jsx
+    |   |           EditModal.jsx
+    |   |           TrainingTable.jsx
+    |   |           
+    |   +---loading
+    |   |       LoadingScreen.css
+    |   |       LoadingScreen.jsx
+    |   |       
+    |   \---Navbar
+    |           Navbar.jsx
+    |           Navbar.module.css
+    |           
+    +---context
+    |       AuthContext.jsx
+    |       
+    +---Elements
+    |   +---BarGraph
+    |   |       BarGraph.css
+    |   |       BarGraph.jsx
+    |   |       
+    |   +---Cards
+    |   |       Cards.jsx
+    |   |       
+    |   \---PieChart
+    |           PieChart.css
+    |           PieChart.jsx
+    |           
+    \---pages
+        +---Dashboard
+        |       Dashboard.jsx
+        |       
+        +---Login
+        |       Login.jsx
+        |       
+        +---Root
+        |       Root.jsx
+        |       Root.module.css
+        |       
+        +---TeamMembers
+        |       TeamMembers.jsx
+        |       
+        +---Training
+        |       Training.jsx
+        |       
+        \---WFO
+                WFO.jsx
+                WFO.module.css

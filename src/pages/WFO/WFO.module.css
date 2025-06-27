@@ -71,6 +71,7 @@ td i{
     align-items: center;
     justify-content: center;
     font-size: 12px;
-    color: #ffc107; /* Professional yellow color */
+    color: #ffbf00; /* Professional yellow color */
     font-weight: bold;
+    filter: grayscale(100%);
 }
