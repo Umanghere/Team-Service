@@ -126,10 +126,16 @@ const Navbar = () => {
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   className="h-5 w-5" 
-                  viewBox="0 0 20 20" 
-                  fill="currentColor"
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
                 >
-                  <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H3zm7 2.5a.5.5 0 01.5.5v5.793l1.646-1.647a.5.5 0 01.708.708l-2.5 2.5a.5.5 0 01-.708 0l-2.5-2.5a.5.5 0 01.708-.708L9 11.793V6a.5.5 0 01.5-.5z" clipRule="evenodd" />
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
+                  />
                 </svg>
               </button>
             </div>
@@ -198,10 +204,16 @@ const Navbar = () => {
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
                     className="h-5 w-5" 
-                    viewBox="0 0 20 20" 
-                    fill="currentColor"
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
                   >
-                    <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H3zm7 2.5a.5.5 0 01.5.5v5.793l1.646-1.647a.5.5 0 01.708.708l-2.5 2.5a.5.5 0 01-.708 0l-2.5-2.5a.5.5 0 01.708-.708L9 11.793V6a.5.5 0 01.5-.5z" clipRule="evenodd" />
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
+                    />
                   </svg>
                 </button>
               </div>
