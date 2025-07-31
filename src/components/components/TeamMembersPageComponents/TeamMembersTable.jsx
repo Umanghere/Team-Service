@@ -2,54 +2,33 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
-import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableFooter,
-  TablePagination,
-  TableRow,
-  Paper,
-  IconButton,
-  TableHead,
-  Tooltip,
-  Typography,
-  Chip,
-  Avatar,
-  Card,
-  CardContent,
-  Fade,
-  Zoom,
-  Skeleton,
-  Alert,
-  Snackbar,
-  Button,
-  Stack,
-  Divider,
-  useMediaQuery
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableFooter from "@mui/material/TableFooter";
+import TablePagination from "@mui/material/TablePagination";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import IconButton from "@mui/material/IconButton";
+import FirstPageIcon from "@mui/icons-material/FirstPage";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import LastPageIcon from "@mui/icons-material/LastPage";
+import TableHead from "@mui/material/TableHead";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
+import UploadIcon from "@mui/icons-material/Upload";
+import DownloadIcon from "@mui/icons-material/Download";
+import SearchIcon from "@mui/icons-material/Search";
+import { Tooltip } from "@mui/material";
+import Typography from "@mui/material/Typography";
 import { styled, alpha } from "@mui/material/styles";
-import {
-  FirstPage as FirstPageIcon,
-  KeyboardArrowLeft,
-  KeyboardArrowRight,
-  LastPage as LastPageIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Upload as UploadIcon,
-  Download as DownloadIcon,
-  Search as SearchIcon,
-  Person as PersonIcon,
-  Business as BusinessIcon,
-  LocationOn as LocationIcon,
-  Phone as PhoneIcon,
-  Code as CodeIcon,
-  Badge as BadgeIcon
-} from "@mui/icons-material";
-import { motion, AnimatePresence } from "framer-motion";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import InputBase from "@mui/material/InputBase";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 import UploadModal from "./UploadModal";
@@ -58,37 +37,22 @@ import { saveAs } from "file-saver";
 import { useAuth } from "../../../context/AuthContext";
 import { ToastContainer, toast } from 'react-toastify';
 
-// Enhanced styled components
-const StyledCard = styled(Card)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  color: 'white',
-  marginBottom: theme.spacing(3),
-  borderRadius: theme.spacing(2),
-  boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
-  '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: '0 12px 40px rgba(102, 126, 234, 0.4)',
-  },
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-}));
 
-const SearchContainer = styled(Box)(({ theme }) => ({
+// Styled components for search input
+const Search = styled("div")(({ theme }) => ({
   position: "relative",
-  borderRadius: theme.spacing(3),
-  background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-  backdropFilter: 'blur(10px)',
-  border: '1px solid rgba(255, 255, 255, 0.2)',
-  transition: 'all 0.3s ease',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: theme.palette.grey[200],
   "&:hover": {
-    transform: 'translateY(-1px)',
-    boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+    backgroundColor: theme.palette.grey[300],
   },
-  "&:focus-within": {
-    boxShadow: '0 0 0 3px rgba(102, 126, 234, 0.3)',
-    transform: 'translateY(-1px)',
-  },
+  marginRight: theme.spacing(2),
+  marginLeft: theme.spacing(2),
   width: "100%",
-  maxWidth: 400,
+  [theme.breakpoints.up("sm")]: {
+    marginLeft: theme.spacing(2),
+    width: "auto",
+  },
 }));
 
 const SearchIconWrapper = styled("div")(({ theme }) => ({
@@ -99,115 +63,21 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  color: theme.palette.primary.main,
-  zIndex: 1,
-}));
-
-const StyledInputBase = styled("input")(({ theme }) => ({
-  width: '100%',
-  padding: theme.spacing(1.5, 1.5, 1.5, 6),
-  border: 'none',
-  outline: 'none',
-  background: 'transparent',
-  fontSize: '16px',
   color: theme.palette.text.primary,
-  '&::placeholder': {
-    color: theme.palette.text.secondary,
-    opacity: 0.7,
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: "inherit",
+  "& .MuiInputBase-input": {
+    padding: theme.spacing(1, 1, 1, 0),
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create("width"),
+    width: "100%",
+    [theme.breakpoints.up("md")]: {
+      width: "20ch",
+    },
   },
 }));
-
-const ActionButton = styled(IconButton)(({ theme, variant = 'primary' }) => {
-  const colors = {
-    primary: { bg: '#667eea', hover: '#5a6fd8' },
-    success: { bg: '#48bb78', hover: '#38a169' },
-    error: { bg: '#f56565', hover: '#e53e3e' },
-    warning: { bg: '#ed8936', hover: '#dd7724' },
-  };
-  
-  return {
-    background: `linear-gradient(135deg, ${colors[variant].bg} 0%, ${colors[variant].hover} 100%)`,
-    color: 'white',
-    borderRadius: theme.spacing(1.5),
-    padding: theme.spacing(1.2),
-    margin: theme.spacing(0, 0.5),
-    boxShadow: `0 4px 15px ${alpha(colors[variant].bg, 0.3)}`,
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    '&:hover': {
-      background: `linear-gradient(135deg, ${colors[variant].hover} 0%, ${colors[variant].bg} 100%)`,
-      transform: 'translateY(-2px)',
-      boxShadow: `0 8px 25px ${alpha(colors[variant].bg, 0.4)}`,
-    },
-    '&:active': {
-      transform: 'translateY(0px)',
-    },
-    '&:disabled': {
-      opacity: 0.6,
-      transform: 'none',
-      cursor: 'not-allowed',
-    },
-  };
-});
-
-const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-  borderRadius: theme.spacing(2),
-  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
-  border: '1px solid rgba(255, 255, 255, 0.2)',
-  background: 'rgba(255, 255, 255, 0.95)',
-  backdropFilter: 'blur(20px)',
-  overflow: 'hidden',
-}));
-
-const StyledTableHead = styled(TableHead)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  '& .MuiTableCell-head': {
-    color: 'white',
-    fontWeight: 700,
-    fontSize: '0.95rem',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    padding: theme.spacing(2),
-    borderBottom: 'none',
-  },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.primary.main, 0.04),
-    transform: 'scale(1.01)',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-  },
-  '&:nth-of-type(even)': {
-    backgroundColor: alpha(theme.palette.grey[100], 0.5),
-  },
-}));
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  padding: theme.spacing(2),
-  borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-  fontSize: '0.9rem',
-}));
-
-const StatusChip = styled(Chip)(({ theme, status }) => {
-  const statusColors = {
-    'Active': { bg: '#48bb78', color: 'white' },
-    'Inactive': { bg: '#f56565', color: 'white' },
-    'On Leave': { bg: '#ed8936', color: 'white' },
-  };
-  
-  return {
-    backgroundColor: statusColors[status]?.bg || theme.palette.grey[300],
-    color: statusColors[status]?.color || theme.palette.text.primary,
-    fontWeight: 600,
-    fontSize: '0.75rem',
-    height: 24,
-    borderRadius: 12,
-    '& .MuiChip-label': {
-      padding: '0 8px',
-    },
-  };
-});
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -231,38 +101,42 @@ function TablePaginationActions(props) {
 
   return (
     <Box sx={{ flexShrink: 0, ml: 2.5 }}>
-      <ActionButton
+      <IconButton
         onClick={handleFirstPageButtonClick}
         disabled={page === 0}
-        variant="primary"
-        size="small"
+        aria-label="first page"
       >
         {theme.direction === "rtl" ? <LastPageIcon /> : <FirstPageIcon />}
-      </ActionButton>
-      <ActionButton
+      </IconButton>
+      <IconButton
         onClick={handleBackButtonClick}
         disabled={page === 0}
-        variant="primary"
-        size="small"
+        aria-label="previous page"
       >
-        {theme.direction === "rtl" ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-      </ActionButton>
-      <ActionButton
+        {theme.direction === "rtl" ? (
+          <KeyboardArrowRight />
+        ) : (
+          <KeyboardArrowLeft />
+        )}
+      </IconButton>
+      <IconButton
         onClick={handleNextButtonClick}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-        variant="primary"
-        size="small"
+        aria-label="next page"
       >
-        {theme.direction === "rtl" ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-      </ActionButton>
-      <ActionButton
+        {theme.direction === "rtl" ? (
+          <KeyboardArrowLeft />
+        ) : (
+          <KeyboardArrowRight />
+        )}
+      </IconButton>
+      <IconButton
         onClick={handleLastPageButtonClick}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-        variant="primary"
-        size="small"
+        aria-label="last page"
       >
         {theme.direction === "rtl" ? <FirstPageIcon /> : <LastPageIcon />}
-      </ActionButton>
+      </IconButton>
     </Box>
   );
 }
@@ -281,50 +155,40 @@ const TeamMembersTable = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false); // New state for upload modal
   const [editData, setEditData] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const { userRole, userEmpId } = useAuth();
-  
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { userRole, userEmpId } = useAuth(); // Access user role, EmpId, and userName from context
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get("https://teamservices-backend.onrender.com/employeesData");
+    axios
+      // .get("https://jsonserver-2xm2.onrender.com/employeesData")
+      .get("https://teamservices-backend.onrender.com/employeesData")
+      .then((response) => {
         setEmployeesData(response.data);
-        setError(null);
-      } catch (error) {
+      })
+      .catch((error) => {
         console.error("Error fetching data: ", error);
-        setError("Failed to load employee data. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
+      });
+  }, [DeleteIcon]);
 
-    fetchData();
-  }, []);
-
+  // EDIT (update) details of Members
   const handleEdit = (employee) => {
     if (userRole === "viewer" && employee.EmpId !== userEmpId) {
-      toast.warning("You can only edit your own data.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      alert("You can only edit your own data.");
       return;
     }
     setEditData(employee);
     setEditModalOpen(true);
   };
 
+  // DELETE Function to delete the user if ADMIN or MANAGER
   const handleDelete = async (_id) => {
-    if (!window.confirm("Are you sure you want to delete this employee?")) return;
+    if (!window.confirm("Are you sure you want to delete this employee?"))
+      return;
 
+    // Check if _id is valid
     if (!_id || _id.length !== 24) {
-      toast.error("Invalid Employee ID. Deletion failed.");
+      alert("Invalid Employee ID. Deletion failed.");
       return;
     }
 
@@ -334,23 +198,34 @@ const TeamMembersTable = () => {
       );
 
       if (response.status === 200) {
+        // alert("Employee deleted successfully!");
         setEmployeesData((prevEmployees) =>
           prevEmployees.filter((emp) => emp._id !== _id)
         );
-        toast.success("Employee deleted successfully!", {
+        toast.error("Employee Deleted", {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light"
         });
       }
     } catch (error) {
       console.error("Error deleting employee:", error);
-      toast.error("Failed to delete employee. Please try again.");
+      alert("Failed to delete employee. Please try again.");
     }
   };
 
+  // console.log("Current User ID:", userEmpId);
+  // console.log("Selected Employee ID:", employee.EmpId);
+
+  // On saving the updated employees
   const handleSave = (updatedEmployee) => {
     if (!updatedEmployee._id) {
-      toast.error("Invalid employee data. Missing ID.");
+      alert("Invalid employee data. Missing _id.");
       return;
     }
 
@@ -360,23 +235,45 @@ const TeamMembersTable = () => {
         updatedEmployee
       )
       .then((response) => {
+        console.log("Updated Employee Response:", response.data);
+
         setEmployeesData((prevData) =>
           prevData.map((emp) =>
             emp._id === updatedEmployee._id ? response.data : emp
           )
         );
         setEditModalOpen(false);
-        toast.success("Employee updated successfully!", {
+        toast.success("Updated Successfully", {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light"
         });
       })
       .catch((error) => {
-        console.error("Error updating data:", error.response?.data || error.message);
-        toast.error("Failed to update employee. Please try again.");
+        console.error(
+          "Error updating data:",
+          error.response?.data || error.message
+        );
+        alert("Failed to update employee. Please try again.");
       });
   };
 
+  //Close the Edit form after Updating
+  const handleCloseModal = () => {
+    setEditModalOpen(false);
+  };
+
+  // Open Form to ADD a Member
+  const handleAdd = () => {
+    setAddModalOpen(true);
+  };
+
+  // ADD the New Member manually
   const handleAddSave = async (employeeData) => {
     try {
       const response = await fetch("https://teamservices-backend.onrender.com/employeesData", {
@@ -392,40 +289,71 @@ const TeamMembersTable = () => {
       }
 
       const newEmployee = await response.json();
-      setEmployeesData((prev) => [...prev, newEmployee]);
-      setAddModalOpen(false);
-      toast.success("Employee added successfully!", {
+      setEmployeesData((prev) => [...prev, newEmployee]); // Update frontend state
+      handleAddClose(); // Close modal after successful save
+      toast.success("Member Added Successfully", {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light"
       });
     } catch (error) {
       console.error("Error adding employee:", error);
-      toast.error("Failed to add employee. Please try again.");
     }
   };
 
-  const handleUploadSave = (newData) => {
-    const promises = newData.map((employee) =>
-      axios.post("https://teamservices-backend.onrender.com/employeesData", employee)
-    );
+  // Close Form to Add new Member
+  const handleAddClose = () => {
+    setAddModalOpen(false);
+  };
 
-    Promise.all(promises)
-      .then((responses) => {
-        const newEmployees = responses.map(response => response.data);
-        setEmployeesData((prevData) => [...prevData, ...newEmployees]);
-        toast.success(`${newData.length} employees uploaded successfully!`, {
-          position: "top-right",
-          autoClose: 3000,
+  // Form to Upload Members from device(excel sheet)
+  const handleUploadOpen = () => {
+    setUploadModalOpen(true);
+  };
+
+  //Adding (uploading) New Member in Team Members by Uploading from Device
+  const handleUploadSave = (newData) => {
+    newData.forEach((employee) => {
+      axios
+        // .post("https://jsonserver-2xm2.onrender.com/employeesData", employee)
+        .post("https://teamservices-backend.onrender.com/employeesData", employee)
+        .then((response) => {
+          setEmployeesData((prevData) => [...prevData, response.data]);
+          toast.success("Members Uploaded Successfully", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light"
+          });
+        })
+        .catch((error) => {
+          console.error("Error adding data from upload: ", error);
+          alert("Failed to upload employee data. Please try again.");
         });
-      })
-      .catch((error) => {
-        console.error("Error uploading data: ", error);
-        toast.error("Some employees failed to upload. Please try again.");
-      });
-    
+    });
     setUploadModalOpen(false);
   };
 
+  // Close form to add (upload) new members
+  const handleUploadClose = () => {
+    setUploadModalOpen(false);
+  };
+
+  // Search Function
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  // Download data in Excel sheet
   const handleDownload = () => {
     const worksheet = XLSX.utils.json_to_sheet(employeesData);
     const workbook = XLSX.utils.book_new();
@@ -437,14 +365,21 @@ const TeamMembersTable = () => {
     const file = new Blob([excelBuffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(file, `employees_data_${new Date().toISOString().split('T')[0]}.xlsx`);
-    toast.success("Employee data downloaded successfully!");
+    saveAs(file, "employees_data.xlsx");
   };
 
-  const filteredData = employeesData.filter((row) =>
-    Object.values(row).some(value =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  // Searching method implementation
+  const filteredData = employeesData.filter(
+    (row) =>
+      (row.Name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (row.Grade?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (row.Designation?.toLowerCase() || "").includes(
+        searchTerm.toLowerCase()
+      ) ||
+      (row.Project?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (row.Skills?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (row.Location?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (row.ContactNo?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   );
 
   const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredData.length);
@@ -458,237 +393,187 @@ const TeamMembersTable = () => {
     setPage(0);
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ p: 4 }}>
-        {[...Array(5)].map((_, index) => (
-          <Skeleton key={index} variant="rectangular" height={60} sx={{ mb: 2 }} />
-        ))}
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ p: 4 }}>
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      </Box>
-    );
-  }
-
   return (
-    <Fade in timeout={1000}>
-      <Box sx={{ p: { xs: 2, md: 4 }, background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', minHeight: '100vh' }}>
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-
-        {/* Header Card */}
-        <StyledCard>
-          <CardContent>
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems="center" justifyContent="space-between">
-              <Box>
-                <Typography variant="h4" fontWeight="bold" gutterBottom>
-                  Team Members
-                </Typography>
-                <Typography variant="body1" opacity={0.9}>
-                  Manage your team efficiently with our advanced member management system
-                </Typography>
-              </Box>
-              
-              <SearchContainer>
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <Box sx={{ paddingRight: 10, paddingLeft: 10 }}>
+        <AppBar
+          position="static"
+          sx={{ backgroundColor: "var(--lt-color-gray-400)" }}
+        >
+          <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography
+                variant="inherit"
+                noWrap
+                sx={{ color: "black", display: { xs: "none", sm: "block" } }}
+              >
+                Employee
+              </Typography>
+              <Search>
                 <SearchIconWrapper>
                   <SearchIcon />
                 </SearchIconWrapper>
                 <StyledInputBase
-                  placeholder="Search employees..."
+                  placeholder="Search…"
+                  inputProps={{
+                    "aria-label": "search",
+                    style: { color: "black" },
+                  }}
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchChange}
                 />
-              </SearchContainer>
-            </Stack>
-          </CardContent>
-        </StyledCard>
-
-        {/* Action Buttons */}
-        <Card sx={{ mb: 3, borderRadius: 2 }}>
-          <CardContent>
-            <Stack direction="row" spacing={1} justifyContent="flex-end" flexWrap="wrap">
+              </Search>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
               {userRole === "admin" && (
                 <>
-                  <Tooltip title="Add New Employee" arrow>
-                    <ActionButton onClick={() => setAddModalOpen(true)} variant="primary">
+                  <Tooltip title="Add Employee">
+                    <IconButton
+                      onClick={handleAdd}
+                      sx={{
+                        backgroundColor: "blue",
+                        color: "white",
+                        "&:hover": { backgroundColor: "darkblue" },
+                        marginRight: "8px", // Space between Add and Upload
+                      }}
+                    >
                       <AddIcon />
-                    </ActionButton>
+                    </IconButton>
                   </Tooltip>
-                  <Tooltip title="Upload Employee List" arrow>
-                    <ActionButton onClick={() => setUploadModalOpen(true)} variant="warning">
+                  <Tooltip title="Upload Employee List">
+                    <IconButton
+                      onClick={handleUploadOpen}
+                      sx={{
+                        backgroundColor: "red",
+                        color: "white",
+                        "&:hover": { backgroundColor: "darkred" },
+                        marginRight: "8px", // Space between Upload and Download
+                      }}
+                    >
                       <UploadIcon />
-                    </ActionButton>
+                    </IconButton>
                   </Tooltip>
                 </>
               )}
-              <Tooltip title="Download Employee Data" arrow>
-                <ActionButton onClick={handleDownload} variant="success">
-                  <DownloadIcon />
-                </ActionButton>
-              </Tooltip>
-            </Stack>
-          </CardContent>
-        </Card>
-
-        {/* Table */}
-        <StyledTableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }}>
-            <StyledTableHead>
-              <TableRow>
-                <TableCell align="center">
-                  <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                    <BadgeIcon fontSize="small" />
-                    Employee ID
-                  </Box>
-                </TableCell>
-                <TableCell align="center">
-                  <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                    <PersonIcon fontSize="small" />
-                    Name
-                  </Box>
-                </TableCell>
-                <TableCell align="center">Grade</TableCell>
-                <TableCell align="center">
-                  <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                    <BusinessIcon fontSize="small" />
-                    Designation
-                  </Box>
-                </TableCell>
-                <TableCell align="center">Project</TableCell>
-                <TableCell align="center">
-                  <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                    <CodeIcon fontSize="small" />
-                    Skills
-                  </Box>
-                </TableCell>
-                <TableCell align="center">
-                  <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                    <LocationIcon fontSize="small" />
-                    Location
-                  </Box>
-                </TableCell>
-                <TableCell align="center">
-                  <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                    <PhoneIcon fontSize="small" />
-                    Contact
-                  </Box>
-                </TableCell>
-                <TableCell align="center">Actions</TableCell>
-              </TableRow>
-            </StyledTableHead>
-            <TableBody>
-              <AnimatePresence>
-                {(rowsPerPage > 0
-                  ? filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  : filteredData
-                ).map((row, index) => (
-                  <motion.tr
-                    key={row.EmpId}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                    component={StyledTableRow}
+              {(userRole === "admin" ||
+                userRole === "manager" ||
+                userRole === "viewer") && (
+                <Tooltip title="Download Employee List">
+                  <IconButton
+                    onClick={handleDownload}
+                    sx={{
+                      backgroundColor: "green",
+                      color: "white",
+                      "&:hover": { backgroundColor: "darkgreen" },
+                    }}
                   >
-                    <StyledTableCell align="center">
-                      <Chip
-                        label={row.EmpId}
-                        size="small"
-                        sx={{
-                          backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                          color: theme.palette.primary.main,
-                          fontWeight: 600,
-                        }}
-                      />
-                    </StyledTableCell>
-                    <StyledTableCell align="center">
-                      <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                        <Avatar
+                    <DownloadIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
+          </Toolbar>
+        </AppBar>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
+            <TableHead>
+              <TableRow>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  EmpID
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Name
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Grade
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Designation
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Project
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Skills
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Location
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  ContactNo
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Actions
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {(rowsPerPage > 0
+                ? filteredData.slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                : filteredData
+              ).map((row) => (
+                <TableRow key={row.EmpId}>
+                  <TableCell align="center" component="th" scope="row">
+                    {row.EmpId}
+                  </TableCell>
+                  <TableCell align="center">{row.Name}</TableCell>
+                  <TableCell align="center">{row.Grade}</TableCell>
+                  <TableCell align="center">{row.Designation}</TableCell>
+                  <TableCell align="center">{row.Project}</TableCell>
+                  <TableCell align="center">{row.Skills}</TableCell>
+                  <TableCell align="center">{row.Location}</TableCell>
+                  <TableCell align="center">{row.ContactNo}</TableCell>
+                  <TableCell align="center">
+                    <Box sx={{ display: "flex", justifyContent: "center", gap:"0.3rem" }}>
+                      {/* EDIT BUTTON */}
+                      <Tooltip title="Edit Employee List">
+                        <IconButton
                           sx={{
-                            width: 32,
-                            height: 32,
-                            bgcolor: theme.palette.primary.main,
-                            fontSize: '0.875rem',
+                            color: "blue",
+                            "&:hover": { color: "darkblue" },
                           }}
+                          onClick={() => handleEdit(row)}
+                          disabled={
+                            userRole === "viewer" && row.EmpId !== userEmpId
+                          }
                         >
-                          {row.Name?.charAt(0) || 'N'}
-                        </Avatar>
-                        <Typography variant="body2" fontWeight={500}>
-                          {row.Name}
-                        </Typography>
-                      </Box>
-                    </StyledTableCell>
-                    <StyledTableCell align="center">
-                      <StatusChip
-                        label={row.Grade}
-                        size="small"
-                        status="Active"
-                      />
-                    </StyledTableCell>
-                    <StyledTableCell align="center">{row.Designation}</StyledTableCell>
-                    <StyledTableCell align="center">
-                      <Chip
-                        label={row.Project}
-                        size="small"
-                        variant="outlined"
-                        sx={{ fontWeight: 500 }}
-                      />
-                    </StyledTableCell>
-                    <StyledTableCell align="center">
-                      <Typography variant="body2" sx={{ maxWidth: 150, wordWrap: 'break-word' }}>
-                        {row.Skills}
-                      </Typography>
-                    </StyledTableCell>
-                    <StyledTableCell align="center">{row.Location}</StyledTableCell>
-                    <StyledTableCell align="center">{row.ContactNo}</StyledTableCell>
-                    <StyledTableCell align="center">
-                      <Stack direction="row" spacing={0.5} justifyContent="center">
-                        <Tooltip title="Edit Employee" arrow>
-                          <span>
-                            <ActionButton
-                              onClick={() => handleEdit(row)}
-                              disabled={userRole === "viewer" && row.EmpId !== userEmpId}
-                              variant="primary"
-                              size="small"
-                            >
-                              <EditIcon fontSize="small" />
-                            </ActionButton>
-                          </span>
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+
+                      {/* DELETE BUTTON - Hidden for Viewers */}
+                      {userRole !== "viewer" && (
+                        <Tooltip title="Delete Employee">
+                          <IconButton
+                            sx={{
+                              color: "red",
+                              "&:hover": { color: "darkred" },
+                            }}
+                            onClick={() => handleDelete(row._id)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
                         </Tooltip>
-                        {userRole !== "viewer" && (
-                          <Tooltip title="Delete Employee" arrow>
-                            <ActionButton
-                              onClick={() => handleDelete(row._id)}
-                              variant="error"
-                              size="small"
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </ActionButton>
-                          </Tooltip>
-                        )}
-                      </Stack>
-                    </StyledTableCell>
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
+                      )}
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 53 * emptyRows }}>
                   <TableCell colSpan={9} />
@@ -705,51 +590,45 @@ const TeamMembersTable = () => {
                   page={page}
                   slotProps={{
                     select: {
-                      inputProps: { "aria-label": "rows per page" },
+                      inputProps: {
+                        "aria-label": "rows per page",
+                      },
                       native: true,
                     },
                   }}
                   onPageChange={handleChangePage}
                   onRowsPerPageChange={handleChangeRowsPerPage}
                   ActionsComponent={TablePaginationActions}
-                  sx={{
-                    '& .MuiTablePagination-toolbar': {
-                      paddingLeft: 2,
-                      paddingRight: 2,
-                    },
-                    '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-                      fontWeight: 500,
-                    },
-                  }}
                 />
               </TableRow>
             </TableFooter>
           </Table>
-        </StyledTableContainer>
+        </TableContainer>
 
-        {/* Modals */}
+        {/* Edit Modal */}
         {editModalOpen && (
           <EditModal
             open={editModalOpen}
-            handleClose={() => setEditModalOpen(false)}
+            handleClose={handleCloseModal}
             employee={editData}
             handleSave={handleSave}
           />
         )}
-        
+        {/* add modal */}
         <AddModal
           open={addModalOpen}
-          handleClose={() => setAddModalOpen(false)}
+          handleClose={handleAddClose}
           handleSave={handleAddSave}
         />
 
+        {/* Upload Modal */}
         <UploadModal
           open={uploadModalOpen}
-          handleClose={() => setUploadModalOpen(false)}
+          handleClose={handleUploadClose}
           handleSave={handleUploadSave}
         />
       </Box>
-    </Fade>
+    </>
   );
 };
 
