@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Box, Typography, TextField, Button, Grid } from "@mui/material";
 import PropTypes from "prop-types";
 
@@ -29,6 +29,15 @@ const AddModal = ({ open, handleClose, handleSave }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
+
+  // Effect to check if all fields are filled to enable/disable the save button
+  useEffect(() => {
+    const allFieldsFilled = Object.values(newEmployee).every(
+      (value) => value.trim() !== ""
+    );
+    setIsSaveDisabled(!allFieldsFilled);
+  }, [newEmployee]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,15 +59,28 @@ const AddModal = ({ open, handleClose, handleSave }) => {
 
     // Validate all fields
     Object.keys(newEmployee).forEach((key) => {
-      if (!newEmployee[key]) {
+      if (!newEmployee[key].trim()) {
         newErrors[key] = `${key} is required`;
       }
     });
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      setIsSaveDisabled(true); // Keep button disabled if there are errors
     } else {
       handleSave(newEmployee);
+      // After successful save, you might want to reset the form and disable the button
+      setNewEmployee({
+        EmpId: "",
+        Name: "",
+        Grade: "",
+        Designation: "",
+        Project: "",
+        Skills: "",
+        Location: "",
+        ContactNo: "",
+      });
+      setErrors({});
     }
   };
 
@@ -181,7 +203,12 @@ const AddModal = ({ open, handleClose, handleSave }) => {
             </Grid>
           </Grid>
           <Box sx={{ mt: 2, display: "flex", gap: 2, justifyContent: "right" }}>
-            <Button type="submit" variant="contained" color="primary">
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={isSaveDisabled} // Disable the button here
+            >
               Save
             </Button>
             <Button onClick={handleClose} variant="contained" color="secondary">

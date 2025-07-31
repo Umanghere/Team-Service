@@ -256,155 +256,150 @@ function CalendarTable() {
   };
 
   return (
-    <>
-      <div className={styles["max-w-full overflow-hidden"]}>
-        <div className={styles["border-2 rounded-md bg-gray-50 py-4 m-8 flex flex-col justify-center items-center gap-4"]}>
-          <div className={styles["flex items-center gap-8 mb-4"]}>
-            <div className={styles["flex justify-center items-center gap-3"]}>
-              {/* Forecast Month */}
-              <label htmlFor="monthSelector" className={styles["text-lg"]}>
-                Forecast Month:
-              </label>
+    <div className="max-w-full overflow-hidden">
+      <div className="border-2 rounded-md bg-gray-50 py-4 m-8">
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-6 mb-6 px-4">
+          <div className="flex items-center gap-3">
+            <label htmlFor="monthSelector" className="text-lg font-medium">
+              Forecast Month:
+            </label>
+            <input
+              type="month"
+              id="monthSelector"
+              name="monthSelector"
+              className="border-2 border-gray-400 rounded-md p-2 text-lg focus:border-blue-500 focus:outline-none"
+              value={selectedMonth.toISOString().slice(0, 7)}
+              onChange={handleMonthChange}
+            />
+          </div>
 
-              {/* Calendar Input */}
-              <input
-                type="month"
-                id="monthSelector"
-                name="monthSelector"
-                className={styles["border-spacing-4 border-2 border-gray-500 rounded-md p-1 text-lg"]}
-                value={selectedMonth.toISOString().slice(0, 7)}
-                onChange={handleMonthChange}
-              />
-            </div>
-
-            {/* Conditionally render WFO preferences */}
-            {userRole === "viewer" && (
-              <div className={styles["flex items-center gap-4"]}>
-                {/* WFO Preferences */}
-                <label className={styles["text-lg"]}>WFO preferences:</label>
+          {userRole === "viewer" && (
+            <div className="flex flex-wrap items-center gap-4">
+              <label className="text-lg font-medium">WFO preferences:</label>
+              <div className="flex gap-4">
                 {["Mon", "Tue", "Wed", "Thu", "Fri"].map((day) => (
-                  <label key={day} className={styles["text-lg"]}>
+                  <label key={day} className="flex items-center gap-1 text-sm">
                     <input
                       type="checkbox"
                       name={day}
                       checked={wfoPreferences[day]}
                       onChange={handleCheckboxChange}
-                    />{" "}
-                    {day}
+                      className="w-4 h-4"
+                    />
+                    <span>{day}</span>
                   </label>
                 ))}
-
+              </div>
+              <div className="flex gap-2">
                 <button
                   onClick={handleApply}
-                  className={styles["px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"]}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-sm"
                 >
                   Apply
                 </button>
-
-                {/* Save Button */}
                 <button
                   onClick={handleSave}
-                  className={styles["px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200"]}
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 text-sm"
                 >
                   Save
                 </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
 
-          {/* Display the number of days in the selected month */}
-          <div className={styles["flex justify-center w-full px-8"]}>
-            <div className={styles["overflow-x-auto w-full bg-white"]}>
-              {
-                <table className={styles["min-w-max"]}>
-                  <thead>
-                    <tr>
-                      <th rowSpan="2" className={styles["px-6"]}>
-                        Name
-                      </th>
-                      {Array.from({ length: daysInSelectedMonth }, (_, i) => (
-                        <th key={i + 1}>{i + 1}</th>
-                      ))}
-                      <th rowSpan={2}>TH ({thCount})</th>
-                      <th rowSpan={2}>TO ({toCount})</th>
-                      <th rowSpan={2}>TL ({tlCount})</th>
-                    </tr>
-                    <tr>
-                      {Array.from({ length: daysInSelectedMonth }, (_, i) => (
-                        <th key={i + 1}>
-                          {getDayName(
-                            new Date(
-                              selectedMonth.getFullYear(),
-                              selectedMonth.getMonth(),
-                              i + 1
-                            )
-                          )}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className={styles["px-6"]}>{userNameAndId}</td>
-                      {Array.from({ length: daysInSelectedMonth }, (_, i) => {
-                        const day = i + 1;
-                        const currentDate = new Date(
+        {/* Table Section */}
+        <div className="overflow-x-auto px-4">
+          <div className="bg-white rounded-lg shadow-sm">
+            <table className={styles.calendarTable}>
+              <thead>
+                <tr>
+                  <th rowSpan="2" className="sticky left-0 bg-white z-10 min-w-[150px]">
+                    Name
+                  </th>
+                  {Array.from({ length: daysInSelectedMonth }, (_, i) => (
+                    <th key={i + 1}>{i + 1}</th>
+                  ))}
+                  <th rowSpan={2}>TH ({thCount})</th>
+                  <th rowSpan={2}>TO ({toCount})</th>
+                  <th rowSpan={2}>TL ({tlCount})</th>
+                </tr>
+                <tr>
+                  {Array.from({ length: daysInSelectedMonth }, (_, i) => (
+                    <th key={i + 1} className="text-xs">
+                      {getDayName(
+                        new Date(
                           selectedMonth.getFullYear(),
                           selectedMonth.getMonth(),
-                          day
-                        );
-                        return (
-                          <td key={day} onClick={() => handleCellClick(day)}>
-                            {isWeekend(currentDate) ? (
-                              <button className={styles["weekend"]}>😊</button>
-                            ) : cellStates[day] === "O" ? (
-                              <button className={styles.O}>O</button>
-                            ) : cellStates[day] === "H" ? (
-                              <button className={styles.H}>H</button>
-                            ) : (
-                              <button className={styles.L}>L</button>
-                            )}
-                          </td>
-                        );
-                      })}
-                      <td>{thCount}</td>
-                      <td>{toCount}</td>
-                      <td>{tlCount}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              }
-            </div>
+                          i + 1
+                        )
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="sticky left-0 bg-white z-10 font-medium">
+                    {userNameAndId}
+                  </td>
+                  {Array.from({ length: daysInSelectedMonth }, (_, i) => {
+                    const day = i + 1;
+                    const currentDate = new Date(
+                      selectedMonth.getFullYear(),
+                      selectedMonth.getMonth(),
+                      day
+                    );
+                    return (
+                      <td key={day} className="text-center p-1">
+                        {isWeekend(currentDate) ? (
+                          <button className={styles.weekend}>😊</button>
+                        ) : cellStates[day] === "O" ? (
+                          <button className={styles.O} onClick={() => handleCellClick(day)}>
+                            O
+                          </button>
+                        ) : cellStates[day] === "H" ? (
+                          <button className={styles.H} onClick={() => handleCellClick(day)}>
+                            H
+                          </button>
+                        ) : (
+                          <button className={styles.L} onClick={() => handleCellClick(day)}>
+                            L
+                          </button>
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td className="text-center font-medium">{thCount}</td>
+                  <td className="text-center font-medium">{toCount}</td>
+                  <td className="text-center font-medium">{tlCount}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      <div>
+      {/* Info Section */}
+      <div className="px-8 pb-4">
         {userRole === "viewer" ? (
-          <div
-            className={styles["ms-5 text-primary e-4 mt-2 fst-italic"]}
-            style={{ textAlign: "left" }}
-          >
-            <i
-              className={styles["fa-solid fa-circle-info me-2"]}
-              style={{ color: "orange" }}
-            ></i>
-            <span className={styles["text-primary"]}>
+          <div className="flex items-center gap-2 text-blue-600">
+            <span className="text-orange-500">ℹ️</span>
+            <span className="text-sm italic">
               Click on a cell to change forecast of current and future dates
             </span>
           </div>
         ) : userRole !== "viewer" ? (
-          <div>
-            <i
-              className={styles["fa-solid fa-circle-info me-2 ms-4 mt-2"]}
-              style={{ color: "orange" }}
-            ></i>
-            <span className={styles["text-primary"]}>
+          <div className="flex items-center gap-2 text-blue-600">
+            <span className="text-orange-500">ℹ️</span>
+            <span className="text-sm italic">
               Click on a cell to change forecast
             </span>
           </div>
         ) : null}
       </div>
+
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
@@ -418,8 +413,8 @@ function CalendarTable() {
           {snackbarMessage}
         </MuiAlert>
       </Snackbar>
-    </>
+    </div>
   );
 }
 
-export default CalendarTable; 
+export default CalendarTable;

@@ -184,7 +184,7 @@ export default function TrainingTable() {
 
     axios
       .put(
-        `https://teamservicesbackend.up.railway.app/trainingData/${updatedEmployee._id}`,
+        `https://teamservices-backend.onrender.com/trainingData/${updatedEmployee._id}`,
         updatedEmployee
       )
       .then((response) => {
@@ -222,7 +222,7 @@ export default function TrainingTable() {
 
   const handleAddSave = async (newEmployee) => {
     try {
-      const response = await fetch("https://teamservicesbackend.up.railway.app/trainingData", {
+      const response = await fetch("https://teamservices-backend.onrender.com/trainingData", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

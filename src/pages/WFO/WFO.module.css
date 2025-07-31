@@ -1,77 +1,170 @@
-th{
-    border: 2px solid rgb(218, 217, 217);
-    padding: 0.5rem 0.6rem;
-    color: rgb(38, 38, 38);
-    font-size: 1.6vh
+/* Calendar Table Styles */
+.calendarTable {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-td{
-    border: 2px solid rgb(218, 217, 217);
-    padding: 0.6rem 0.4vw;
+.calendarTable th {
+    border: 2px solid #e5e7eb;
+    padding: 8px 6px;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 600;
+    background-color: #f9fafb;
+    text-align: center;
+    min-width: 35px;
 }
 
-td i{
-    opacity: 0.8;
-    color: rgb(224, 90, 0);
+.calendarTable td {
+    border: 2px solid #e5e7eb;
+    padding: 4px;
+    text-align: center;
+    vertical-align: middle;
+    min-width: 35px;
+    height: 45px;
+}
+
+/* Status Button Base Styles */
+.calendarTable button {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    outline: none;
+}
+
+.calendarTable button:hover {
+    transform: scale(1.1);
 }
 
 /* Office Button */
 .O {
-    height: 24px;
-    width: 24px;
+    height: 28px;
+    width: 28px;
     border-radius: 50%;
-    border: 2px solid #007bff; /* Professional blue color */
-    background-color: #ffffff; /* White background */
+    border: 2px solid #3b82f6;
+    background-color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 12px;
-    color: #007bff; /* Professional blue color */
+    color: #3b82f6;
     font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.O:hover {
+    background-color: #3b82f6;
+    color: white;
+    transform: scale(1.1);
 }
 
 /* Home Button */
 .H {
-    height: 24px;
-    width: 24px;
+    height: 28px;
+    width: 28px;
     border-radius: 50%;
-    border: 2px solid #28a745; /* Professional green color */
-    background-color: #ffffff; /* White background */
+    border: 2px solid #10b981;
+    background-color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 12px;
-    color: #28a745; /* Professional green color */
+    color: #10b981;
     font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.H:hover {
+    background-color: #10b981;
+    color: white;
+    transform: scale(1.1);
 }
 
 /* Leave/Holiday Button */
 .L {
-    height: 24px;
-    width: 24px;
+    height: 28px;
+    width: 28px;
     border-radius: 50%;
-    border: 2px solid #dc3545; /* Professional red color */
-    background-color: #ffffff; /* White background */
+    border: 2px solid #ef4444;
+    background-color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 12px;
-    color: #dc3545; /* Professional red color */
+    color: #ef4444;
     font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.L:hover {
+    background-color: #ef4444;
+    color: white;
+    transform: scale(1.1);
 }
 
 /* Weekend Button */
 .weekend {
-    height: 24px;
-    width: 24px;
+    height: 28px;
+    width: 28px;
     border-radius: 50%;
-    border: 2px solid #ffc107; /* Professional yellow color */
-    background-color: #ffffff; /* White background */
+    border: 2px solid #f59e0b;
+    background-color: #fef3c7;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    color: #ffbf00; /* Professional yellow color */
+    font-size: 14px;
+    color: #d97706;
     font-weight: bold;
-    filter: grayscale(100%);
+    cursor: default;
+    opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .calendarTable th,
+    .calendarTable td {
+        padding: 2px;
+        font-size: 12px;
+        min-width: 30px;
+    }
+    
+    .calendarTable th {
+        font-size: 11px;
+    }
+    
+    .O, .H, .L, .weekend {
+        height: 24px;
+        width: 24px;
+        font-size: 10px;
+    }
+    
+    .weekend {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendarTable th,
+    .calendarTable td {
+        padding: 1px;
+        font-size: 10px;
+        min-width: 25px;
+    }
+    
+    .O, .H, .L, .weekend {
+        height: 20px;
+        width: 20px;
+        font-size: 8px;
+    }
+    
+    .weekend {
+        font-size: 10px;
+    }
 }

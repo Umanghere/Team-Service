@@ -23,7 +23,7 @@ const Cards = () => {
       });
 
     // Fetch attendance data
-    axios.get("https://teamservicesbackend.up.railway.app/attendanceData")
+    axios.get("https://teamservices-backend.onrender.com/attendanceData")
       .then(response => {
         // Calculate present and leave counts
         const today = new Date().toISOString().split('T')[0];
@@ -45,7 +45,7 @@ const Cards = () => {
       });
     
     // Fetch training data
-    axios.get("https://teamservicesbackend.up.railway.app/trainingData")
+    axios.get("https://teamservices-backend.onrender.com/trainingData")
       .then(response => {
         const completedTrainings = response.data.filter(item => 
           item.status === 'completed' || item.status === 'Completed'
