@@ -18,8 +18,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // const response = await fetch("https://teamservicesbackend.up.railway.app/login", {
-      const response = await fetch("https://teamservices-backend.onrender.com/auth/login", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

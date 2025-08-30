@@ -8,20 +8,26 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: '90%',
+  maxWidth: 400,
+  maxHeight: "90%",
+  overflow: 'hidden',
   bgcolor: 'background.paper',
   boxShadow: 24,
   p: 4,
+  borderRadius: 2,
 };
 
 const UploadModal = ({ open, handleClose, handleSave }) => {
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (open) {
       setError('');
       setFile(null);
+      setIsUploading(false);
     }
   }, [open]);
 
@@ -39,14 +45,15 @@ const UploadModal = ({ open, handleClose, handleSave }) => {
     }
   };
 
-  const handleFileUpload = () => {
+  const handleFileUpload = async () => {
     if (!file) {
       setError('Please select a file to upload.');
       return;
     }
 
+    setIsUploading(true);
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
@@ -56,17 +63,14 @@ const UploadModal = ({ open, handleClose, handleSave }) => {
         }
 
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' }); // Avoid undefined values
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
 
         if (!jsonData.length) {
           throw new Error('The uploaded file is empty or has no readable data.');
         }
 
-        console.log('Extracted Data:', jsonData); // Debugging
-
-        // Try saving the data
         try {
-          handleSave(jsonData);
+          await handleSave(jsonData);
           handleClose();
         } catch (saveError) {
           console.error('Error saving data:', saveError);
@@ -76,11 +80,14 @@ const UploadModal = ({ open, handleClose, handleSave }) => {
       } catch (err) {
         console.error('File processing error:', err);
         setError('Error processing file. Please check the format or try a different file.');
+      } finally {
+        setIsUploading(false);
       }
     };
 
     reader.onerror = () => {
       setError('Failed to read file. Please try again.');
+      setIsUploading(false);
     };
 
     reader.readAsArrayBuffer(file);
@@ -89,16 +96,29 @@ const UploadModal = ({ open, handleClose, handleSave }) => {
   return (
     <Modal open={open} onClose={handleClose} aria-labelledby="upload-modal-title">
       <Box sx={style}>
-        <Typography id="upload-modal-title" variant="h6">
+        <Typography id="upload-modal-title" variant="h5" component="h2" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
           Upload Employee Data
         </Typography>
-        {error && <Alert severity="error">{error}</Alert>}
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
-        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'right', mt: 2 }}>
-          <Button variant="contained" color="primary" onClick={handleFileUpload}>
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleFileUpload}
+            disabled={!file || isUploading}
+            size="large"
+            sx={{ minWidth: 100 }}
+          >
             Upload
           </Button>
-          <Button variant="contained" color="secondary" onClick={handleClose}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={handleClose}
+            size="large"
+            sx={{ minWidth: 100 }}
+          >
             Cancel
           </Button>
         </Box>

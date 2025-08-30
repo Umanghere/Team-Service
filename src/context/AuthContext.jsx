@@ -10,8 +10,36 @@ export const AuthProvider = ({ children }) => {
   const [userRole, setUserRole] = useState(""); // State for user role
   const [userName, setUserName] = useState(""); // State for user name
   const [userEmpId, setUserEmpId] = useState(""); // State for user EmpId
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   // console.log(userEmpId);
+
+  // Check for existing session on app load
+  useEffect(() => {
+    const checkExistingSession = () => {
+      try {
+        const storedAuth = localStorage.getItem('authData');
+        if (storedAuth) {
+          const authData = JSON.parse(storedAuth);
+          setIsAuthenticated(true);
+          setUserEmail(authData.email);
+          setUserRole(authData.role);
+          setUserName(authData.name);
+          setUserEmpId(authData.empId);
+        }
+      } catch (error) {
+        console.error("Error restoring auth state:", error);
+        // Clear corrupted data
+        localStorage.removeItem('authData');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkExistingSession();
+  }, []);
+
+
   // Function to handle login
   const login = async (email, role) => {
     setIsAuthenticated(true);
@@ -20,21 +48,37 @@ export const AuthProvider = ({ children }) => {
 
     try {
       // const response = await fetch("https://jsonserver-2xm2.onrender.com/users");
-      const response = await fetch("https://teamservices-backend.onrender.com/users");
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users`);
       const users = await response.json();
 
       // Find the user based on the email
       const loggedInUser = users.find((user) => user.email === email);
-
+      
       if (loggedInUser) {
         setUserName(loggedInUser.Name);
         setUserEmpId(loggedInUser.EmpId);
+        
+        const authData = {
+          email: email,
+          role: role,
+          name: loggedInUser.Name,
+          empId: loggedInUser.EmpId
+        };
+        localStorage.setItem('authData', JSON.stringify(authData));
+        navigate("/Team-Service-UI", { replace: true });
       } else {
         console.error("User not found:", email);
+        throw new Error("User not found");
       }
     } 
     catch (error) {
       console.error("Error fetching user data:", error);
+      setIsAuthenticated(false);
+      setUserEmail("");
+      setUserRole("");
+      setUserName("");
+      setUserEmpId("");
+
     }
   };
 
@@ -45,8 +89,13 @@ export const AuthProvider = ({ children }) => {
     setUserRole(""); // Clear user role on logout
     setUserName(""); // Clear user name on logout
     setUserEmpId(""); // Clear user EmpId on logout
+    localStorage.removeItem('authData');
     navigate("/", { replace: true });
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <AuthContext.Provider

@@ -1,14 +1,13 @@
-// src/components/ProtectedRoute.jsx
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import 'tailwindcss/tailwind.css';
 
 const ProtectedRoute = ({ children }) => {
-  const { userEmail } = useAuth();
+  const { isAuthenticated, userEmail } = useAuth();
 
-  if (!userEmail) {
-    return <Navigate to="/Team-Service-UI/login" />;
+  // If not authenticated or no user email, redirect to login
+  if (!isAuthenticated || !userEmail) {
+    return <Navigate to="/" replace />;
   }
 
   return children;

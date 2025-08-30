@@ -7,10 +7,10 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: "90%", // Use a percentage to ensure it fits within the viewport
-  maxWidth: 600, // Set a maximum width for two columns
-  maxHeight: "90%", // Ensure it does not exceed the viewport height
-  overflow: "hidden", // Remove the overflow auto to hide scrollbars
+  width: "90%",
+  maxWidth: 600,
+  maxHeight: "90%",
+  overflow: "hidden",
   bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
@@ -30,8 +30,8 @@ const AddModal = ({ open, handleClose, handleSave }) => {
 
   const [errors, setErrors] = useState({});
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Effect to check if all fields are filled to enable/disable the save button
   useEffect(() => {
     const allFieldsFilled = Object.values(newEmployee).every(
       (value) => value.trim() !== ""
@@ -46,18 +46,16 @@ const AddModal = ({ open, handleClose, handleSave }) => {
       [name]: value,
     }));
 
-    // Clear the error for the current field
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: !value ? `${name} is required` : "",
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
-    // Validate all fields
     Object.keys(newEmployee).forEach((key) => {
       if (!newEmployee[key].trim()) {
         newErrors[key] = `${key} is required`;
@@ -66,10 +64,13 @@ const AddModal = ({ open, handleClose, handleSave }) => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setIsSaveDisabled(true); // Keep button disabled if there are errors
-    } else {
-      handleSave(newEmployee);
-      // After successful save, you might want to reset the form and disable the button
+      setIsSaveDisabled(true);
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await handleSave(newEmployee);
       setNewEmployee({
         EmpId: "",
         Name: "",
@@ -81,143 +82,168 @@ const AddModal = ({ open, handleClose, handleSave }) => {
         ContactNo: "",
       });
       setErrors({});
+    } catch (error) {
+      console.error("Error saving data:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="add-employee-modal"
-        aria-describedby="add-employee-modal-description"
-      >
-        <Box sx={style} component="form" onSubmit={handleSubmit}>
-          <Typography id="add-employee-modal" variant="h6" component="h2">
-            Add Employee
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="EmpId"
-                name="EmpId"
-                value={newEmployee.EmpId}
-                onChange={handleChange}
-                fullWidth
-                margin="dense"
-                required
-                error={!!errors.EmpId}
-                helperText={errors.EmpId}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Name"
-                name="Name"
-                value={newEmployee.Name}
-                onChange={handleChange}
-                fullWidth
-                margin="dense"
-                required
-                error={!!errors.Name}
-                helperText={errors.Name}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Grade"
-                name="Grade"
-                value={newEmployee.Grade}
-                onChange={handleChange}
-                fullWidth
-                margin="dense"
-                required
-                error={!!errors.Grade}
-                helperText={errors.Grade}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Designation"
-                name="Designation"
-                value={newEmployee.Designation}
-                onChange={handleChange}
-                fullWidth
-                margin="dense"
-                required
-                error={!!errors.Designation}
-                helperText={errors.Designation}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Project"
-                name="Project"
-                value={newEmployee.Project}
-                onChange={handleChange}
-                fullWidth
-                margin="dense"
-                required
-                error={!!errors.Project}
-                helperText={errors.Project}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Skills"
-                name="Skills"
-                value={newEmployee.Skills}
-                onChange={handleChange}
-                fullWidth
-                margin="dense"
-                required
-                error={!!errors.Skills}
-                helperText={errors.Skills}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Location"
-                name="Location"
-                value={newEmployee.Location}
-                onChange={handleChange}
-                fullWidth
-                margin="dense"
-                required
-                error={!!errors.Location}
-                helperText={errors.Location}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="ContactNo"
-                name="ContactNo"
-                value={newEmployee.ContactNo}
-                onChange={handleChange}
-                fullWidth
-                margin="dense"
-                required
-                error={!!errors.ContactNo}
-                helperText={errors.ContactNo}
-              />
-            </Grid>
+    <Modal
+      open={open}
+      onClose={handleClose}
+      aria-labelledby="add-employee-modal"
+      aria-describedby="add-employee-modal-description"
+    >
+      <Box sx={style} component="form" onSubmit={handleSubmit}>
+        <Typography
+          id="add-employee-modal"
+          variant="h5"
+          component="h2"
+          sx={{ mb: 3, fontWeight: 600, color: "primary.main" }}
+        >
+          Add Employee
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="EmpId"
+              name="EmpId"
+              value={newEmployee.EmpId}
+              onChange={handleChange}
+              fullWidth
+              margin="dense"
+              required
+              error={!!errors.EmpId}
+              helperText={errors.EmpId}
+            />
           </Grid>
-          <Box sx={{ mt: 2, display: "flex", gap: 2, justifyContent: "right" }}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              disabled={isSaveDisabled} // Disable the button here
-            >
-              Save
-            </Button>
-            <Button onClick={handleClose} variant="contained" color="secondary">
-              Cancel
-            </Button>
-          </Box>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Name"
+              name="Name"
+              value={newEmployee.Name}
+              onChange={handleChange}
+              fullWidth
+              margin="dense"
+              required
+              error={!!errors.Name}
+              helperText={errors.Name}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Grade"
+              name="Grade"
+              value={newEmployee.Grade}
+              onChange={handleChange}
+              fullWidth
+              margin="dense"
+              required
+              error={!!errors.Grade}
+              helperText={errors.Grade}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Designation"
+              name="Designation"
+              value={newEmployee.Designation}
+              onChange={handleChange}
+              fullWidth
+              margin="dense"
+              required
+              error={!!errors.Designation}
+              helperText={errors.Designation}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Project"
+              name="Project"
+              value={newEmployee.Project}
+              onChange={handleChange}
+              fullWidth
+              margin="dense"
+              required
+              error={!!errors.Project}
+              helperText={errors.Project}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Skills"
+              name="Skills"
+              value={newEmployee.Skills}
+              onChange={handleChange}
+              fullWidth
+              margin="dense"
+              required
+              error={!!errors.Skills}
+              helperText={errors.Skills}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Location"
+              name="Location"
+              value={newEmployee.Location}
+              onChange={handleChange}
+              fullWidth
+              margin="dense"
+              required
+              error={!!errors.Location}
+              helperText={errors.Location}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="ContactNo"
+              name="ContactNo"
+              value={newEmployee.ContactNo}
+              onChange={handleChange}
+              fullWidth
+              margin="dense"
+              required
+              error={!!errors.ContactNo}
+              helperText={errors.ContactNo}
+            />
+          </Grid>
+        </Grid>
+        <Box
+          sx={{
+            mt: 4,
+            display: "flex",
+            gap: 2,
+            justifyContent: "flex-end",
+            pt: 2,
+            borderTop: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            size="large"
+            disabled={isSaveDisabled || isSubmitting}
+            sx={{ minWidth: 100 }}
+          >
+            Save
+          </Button>
+          <Button
+            onClick={handleClose}
+            variant="outlined"
+            color="secondary"
+            size="large"
+            sx={{ minWidth: 100 }}
+          >
+            Cancel
+          </Button>
         </Box>
-      </Modal>
-    </>
+      </Box>
+    </Modal>
   );
 };
 

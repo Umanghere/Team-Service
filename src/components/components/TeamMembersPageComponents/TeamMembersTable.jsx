@@ -1,34 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableFooter from "@mui/material/TableFooter";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import IconButton from "@mui/material/IconButton";
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableFooter,
+  TablePagination,
+  TableRow,
+  Paper,
+  IconButton,
+  TableHead,
+  Tooltip,
+  Typography,
+  AppBar,
+  Toolbar,
+  InputBase,
+} from "@mui/material";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
-import TableHead from "@mui/material/TableHead";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import UploadIcon from "@mui/icons-material/Upload";
 import DownloadIcon from "@mui/icons-material/Download";
 import SearchIcon from "@mui/icons-material/Search";
-import { Tooltip } from "@mui/material";
-import Typography from "@mui/material/Typography";
-import { styled, alpha } from "@mui/material/styles";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import InputBase from "@mui/material/InputBase";
+import { styled } from "@mui/material/styles";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 import UploadModal from "./UploadModal";
@@ -36,7 +38,6 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useAuth } from "../../../context/AuthContext";
 import { ToastContainer, toast } from 'react-toastify';
-
 
 // Styled components for search input
 const Search = styled("div")(({ theme }) => ({
@@ -79,6 +80,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+// Table Pagination component
 function TablePaginationActions(props) {
   const theme = useTheme();
   const { count, page, rowsPerPage, onPageChange } = props;
@@ -148,6 +150,7 @@ TablePaginationActions.propTypes = {
   rowsPerPage: PropTypes.number.isRequired,
 };
 
+// Main Component
 const TeamMembersTable = () => {
   const [employeesData, setEmployeesData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -155,205 +158,133 @@ const TeamMembersTable = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [uploadModalOpen, setUploadModalOpen] = useState(false); // New state for upload modal
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [editData, setEditData] = useState({});
-  const { userRole, userEmpId } = useAuth(); // Access user role, EmpId, and userName from context
+  const { userRole, userEmpId } = useAuth();
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/employeesData`
+      );
+      setEmployeesData(response.data);
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+      toast.error("Failed to fetch employee data.");
+    }
+  };
 
   useEffect(() => {
-    axios
-      // .get("https://jsonserver-2xm2.onrender.com/employeesData")
-      .get("https://teamservices-backend.onrender.com/employeesData")
-      .then((response) => {
-        setEmployeesData(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data: ", error);
-      });
-  }, [DeleteIcon]);
+    fetchEmployees();
+  }, []);
 
-  // EDIT (update) details of Members
   const handleEdit = (employee) => {
     if (userRole === "viewer" && employee.EmpId !== userEmpId) {
-      alert("You can only edit your own data.");
+      toast.error("You can only edit your own data.");
       return;
     }
     setEditData(employee);
     setEditModalOpen(true);
   };
 
-  // DELETE Function to delete the user if ADMIN or MANAGER
   const handleDelete = async (_id) => {
     if (!window.confirm("Are you sure you want to delete this employee?"))
       return;
 
-    // Check if _id is valid
-    if (!_id || _id.length !== 24) {
-      alert("Invalid Employee ID. Deletion failed.");
-      return;
-    }
-
     try {
-      const response = await axios.delete(
-        `https://teamservices-backend.onrender.com/employeesData/${_id}`
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/employeesData/${_id}`
       );
-
-      if (response.status === 200) {
-        // alert("Employee deleted successfully!");
-        setEmployeesData((prevEmployees) =>
-          prevEmployees.filter((emp) => emp._id !== _id)
-        );
-        toast.error("Employee Deleted", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light"
-        });
-      }
+      setEmployeesData((prevEmployees) =>
+        prevEmployees.filter((emp) => emp._id !== _id)
+      );
+      toast.error("Employee Deleted Successfully");
     } catch (error) {
       console.error("Error deleting employee:", error);
-      alert("Failed to delete employee. Please try again.");
+      toast.error("Failed to delete employee. Please try again.");
     }
   };
 
-  // console.log("Current User ID:", userEmpId);
-  // console.log("Selected Employee ID:", employee.EmpId);
-
-  // On saving the updated employees
-  const handleSave = (updatedEmployee) => {
-    if (!updatedEmployee._id) {
-      alert("Invalid employee data. Missing _id.");
-      return;
-    }
-
-    axios
-      .put(
-        `https://teamservices-backend.onrender.com/employeesData/${updatedEmployee._id}`,
+  const handleSave = async (updatedEmployee) => {
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/employeesData/${updatedEmployee._id}`,
         updatedEmployee
-      )
-      .then((response) => {
-        console.log("Updated Employee Response:", response.data);
+      );
 
-        setEmployeesData((prevData) =>
-          prevData.map((emp) =>
-            emp._id === updatedEmployee._id ? response.data : emp
-          )
-        );
-        setEditModalOpen(false);
-        toast.success("Updated Successfully", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light"
-        });
-      })
-      .catch((error) => {
-        console.error(
-          "Error updating data:",
-          error.response?.data || error.message
-        );
-        alert("Failed to update employee. Please try again.");
-      });
+      setEmployeesData((prevData) =>
+        prevData.map((emp) =>
+          emp._id === updatedEmployee._id ? response.data : emp
+        )
+      );
+      setEditModalOpen(false);
+      toast.success("Updated Successfully");
+    } catch (error) {
+      console.error("Error updating data:", error.response?.data || error.message);
+      toast.error("Failed to update employee. Please try again.");
+    }
   };
 
-  //Close the Edit form after Updating
   const handleCloseModal = () => {
     setEditModalOpen(false);
   };
 
-  // Open Form to ADD a Member
   const handleAdd = () => {
     setAddModalOpen(true);
   };
 
-  // ADD the New Member manually
   const handleAddSave = async (employeeData) => {
     try {
-      const response = await fetch("https://teamservices-backend.onrender.com/employeesData", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(employeeData),
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/employeesData`,
+        employeeData
+      );
 
-      if (!response.ok) {
-        throw new Error("Failed to add employee");
-      }
-
-      const newEmployee = await response.json();
-      setEmployeesData((prev) => [...prev, newEmployee]); // Update frontend state
-      handleAddClose(); // Close modal after successful save
-      toast.success("Member Added Successfully", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light"
-      });
+      setEmployeesData((prev) => [...prev, response.data]);
+      handleAddClose();
+      toast.success("Member Added Successfully");
     } catch (error) {
       console.error("Error adding employee:", error);
+      toast.error("Failed to add employee. Please try again.");
     }
   };
 
-  // Close Form to Add new Member
   const handleAddClose = () => {
     setAddModalOpen(false);
   };
 
-  // Form to Upload Members from device(excel sheet)
   const handleUploadOpen = () => {
     setUploadModalOpen(true);
   };
 
-  //Adding (uploading) New Member in Team Members by Uploading from Device
-  const handleUploadSave = (newData) => {
-    newData.forEach((employee) => {
-      axios
-        // .post("https://jsonserver-2xm2.onrender.com/employeesData", employee)
-        .post("https://teamservices-backend.onrender.com/employeesData", employee)
-        .then((response) => {
-          setEmployeesData((prevData) => [...prevData, response.data]);
-          toast.success("Members Uploaded Successfully", {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light"
-          });
-        })
-        .catch((error) => {
-          console.error("Error adding data from upload: ", error);
-          alert("Failed to upload employee data. Please try again.");
-        });
-    });
-    setUploadModalOpen(false);
+  const handleUploadSave = async (newData) => {
+    try {
+      // Use Promise.all to handle concurrent API calls more efficiently
+      const uploadPromises = newData.map((employee) =>
+        axios.post(`${import.meta.env.VITE_API_BASE_URL}/employeesData`, employee)
+      );
+      const responses = await Promise.all(uploadPromises);
+
+      // Extract new employee data from responses
+      const newEmployees = responses.map(res => res.data);
+      setEmployeesData(prevData => [...prevData, ...newEmployees]);
+      toast.success("Members Uploaded Successfully");
+    } catch (error) {
+      console.error("Error adding data from upload: ", error);
+      toast.error("Failed to upload employee data. Please try again.");
+    } finally {
+      setUploadModalOpen(false);
+    }
   };
 
-  // Close form to add (upload) new members
   const handleUploadClose = () => {
     setUploadModalOpen(false);
   };
 
-  // Search Function
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  // Download data in Excel sheet
   const handleDownload = () => {
     const worksheet = XLSX.utils.json_to_sheet(employeesData);
     const workbook = XLSX.utils.book_new();
@@ -368,7 +299,6 @@ const TeamMembersTable = () => {
     saveAs(file, "employees_data.xlsx");
   };
 
-  // Searching method implementation
   const filteredData = employeesData.filter(
     (row) =>
       (row.Name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
@@ -394,7 +324,223 @@ const TeamMembersTable = () => {
   };
 
   return (
-    <>
+    <Box sx={{ paddingRight: 10, paddingLeft: 10 }}>
+      <AppBar
+        position="static"
+        sx={{ backgroundColor: "var(--lt-color-gray-400)" }}
+      >
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Typography
+              variant="inherit"
+              noWrap
+              sx={{ color: "black", display: { xs: "none", sm: "block" } }}
+            >
+              Employee
+            </Typography>
+            <Search>
+              <SearchIconWrapper>
+                <SearchIcon />
+              </SearchIconWrapper>
+              <StyledInputBase
+                placeholder="Search…"
+                inputProps={{
+                  "aria-label": "search",
+                  style: { color: "black" },
+                }}
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </Search>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            {userRole === "admin" && (
+              <>
+                <Tooltip title="Add Employee">
+                  <IconButton
+                    onClick={handleAdd}
+                    sx={{
+                      backgroundColor: "blue",
+                      color: "white",
+                      "&:hover": { backgroundColor: "darkblue" },
+                      marginRight: "8px",
+                    }}
+                  >
+                    <AddIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Upload Employee List">
+                  <IconButton
+                    onClick={handleUploadOpen}
+                    sx={{
+                      backgroundColor: "red",
+                      color: "white",
+                      "&:hover": { backgroundColor: "darkred" },
+                      marginRight: "8px",
+                    }}
+                  >
+                    <UploadIcon />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
+            {(userRole === "admin" ||
+              userRole === "manager" ||
+              userRole === "viewer") && (
+              <Tooltip title="Download Employee List">
+                <IconButton
+                  onClick={handleDownload}
+                  sx={{
+                    backgroundColor: "green",
+                    color: "white",
+                    "&:hover": { backgroundColor: "darkgreen" },
+                  }}
+                >
+                  <DownloadIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Box>
+        </Toolbar>
+      </AppBar>
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
+          <TableHead>
+            <TableRow>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                EmpID
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                Name
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                Grade
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                Designation
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                Project
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                Skills
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                Location
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                ContactNo
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {(rowsPerPage > 0
+              ? filteredData.slice(
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                )
+              : filteredData
+            ).map((row) => (
+              <TableRow key={row.EmpId}>
+                <TableCell align="center" component="th" scope="row">
+                  {row.EmpId}
+                </TableCell>
+                <TableCell align="center">{row.Name}</TableCell>
+                <TableCell align="center">{row.Grade}</TableCell>
+                <TableCell align="center">{row.Designation}</TableCell>
+                <TableCell align="center">{row.Project}</TableCell>
+                <TableCell align="center">{row.Skills}</TableCell>
+                <TableCell align="center">{row.Location}</TableCell>
+                <TableCell align="center">{row.ContactNo}</TableCell>
+                <TableCell align="center">
+                  <Box
+                    sx={{ display: "flex", justifyContent: "center", gap: "0.3rem" }}
+                  >
+                    {/* EDIT BUTTON */}
+                    <Tooltip title="Edit Employee List">
+                      <IconButton
+                        sx={{
+                          color: "blue",
+                          "&:hover": { color: "darkblue" },
+                        }}
+                        onClick={() => handleEdit(row)}
+                        disabled={userRole === "viewer" && row.EmpId !== userEmpId}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+
+                    {/* DELETE BUTTON - Hidden for Viewers */}
+                    {userRole !== "viewer" && (
+                      <Tooltip title="Delete Employee">
+                        <IconButton
+                          sx={{
+                            color: "red",
+                            "&:hover": { color: "darkred" },
+                          }}
+                          onClick={() => handleDelete(row._id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+            {emptyRows > 0 && (
+              <TableRow style={{ height: 53 * emptyRows }}>
+                <TableCell colSpan={9} />
+              </TableRow>
+            )}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                colSpan={9}
+                count={filteredData.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                slotProps={{
+                  select: {
+                    inputProps: {
+                      "aria-label": "rows per page",
+                    },
+                    native: true,
+                  },
+                }}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+              />
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TableContainer>
+
+      {/* Modals */}
+      {editModalOpen && (
+        <EditModal
+          open={editModalOpen}
+          handleClose={handleCloseModal}
+          employee={editData}
+          handleSave={handleSave}
+        />
+      )}
+      <AddModal
+        open={addModalOpen}
+        handleClose={handleAddClose}
+        handleSave={handleAddSave}
+      />
+      <UploadModal
+        open={uploadModalOpen}
+        handleClose={handleUploadClose}
+        handleSave={handleUploadSave}
+      />
       <ToastContainer
         position="top-right"
         autoClose={2000}
@@ -407,228 +553,7 @@ const TeamMembersTable = () => {
         pauseOnHover
         theme="light"
       />
-      <Box sx={{ paddingRight: 10, paddingLeft: 10 }}>
-        <AppBar
-          position="static"
-          sx={{ backgroundColor: "var(--lt-color-gray-400)" }}
-        >
-          <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Typography
-                variant="inherit"
-                noWrap
-                sx={{ color: "black", display: { xs: "none", sm: "block" } }}
-              >
-                Employee
-              </Typography>
-              <Search>
-                <SearchIconWrapper>
-                  <SearchIcon />
-                </SearchIconWrapper>
-                <StyledInputBase
-                  placeholder="Search…"
-                  inputProps={{
-                    "aria-label": "search",
-                    style: { color: "black" },
-                  }}
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                />
-              </Search>
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              {userRole === "admin" && (
-                <>
-                  <Tooltip title="Add Employee">
-                    <IconButton
-                      onClick={handleAdd}
-                      sx={{
-                        backgroundColor: "blue",
-                        color: "white",
-                        "&:hover": { backgroundColor: "darkblue" },
-                        marginRight: "8px", // Space between Add and Upload
-                      }}
-                    >
-                      <AddIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Upload Employee List">
-                    <IconButton
-                      onClick={handleUploadOpen}
-                      sx={{
-                        backgroundColor: "red",
-                        color: "white",
-                        "&:hover": { backgroundColor: "darkred" },
-                        marginRight: "8px", // Space between Upload and Download
-                      }}
-                    >
-                      <UploadIcon />
-                    </IconButton>
-                  </Tooltip>
-                </>
-              )}
-              {(userRole === "admin" ||
-                userRole === "manager" ||
-                userRole === "viewer") && (
-                <Tooltip title="Download Employee List">
-                  <IconButton
-                    onClick={handleDownload}
-                    sx={{
-                      backgroundColor: "green",
-                      color: "white",
-                      "&:hover": { backgroundColor: "darkgreen" },
-                    }}
-                  >
-                    <DownloadIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </Box>
-          </Toolbar>
-        </AppBar>
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
-            <TableHead>
-              <TableRow>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  EmpID
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Name
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Grade
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Designation
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Project
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Skills
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Location
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  ContactNo
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Actions
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(rowsPerPage > 0
-                ? filteredData.slice(
-                    page * rowsPerPage,
-                    page * rowsPerPage + rowsPerPage
-                  )
-                : filteredData
-              ).map((row) => (
-                <TableRow key={row.EmpId}>
-                  <TableCell align="center" component="th" scope="row">
-                    {row.EmpId}
-                  </TableCell>
-                  <TableCell align="center">{row.Name}</TableCell>
-                  <TableCell align="center">{row.Grade}</TableCell>
-                  <TableCell align="center">{row.Designation}</TableCell>
-                  <TableCell align="center">{row.Project}</TableCell>
-                  <TableCell align="center">{row.Skills}</TableCell>
-                  <TableCell align="center">{row.Location}</TableCell>
-                  <TableCell align="center">{row.ContactNo}</TableCell>
-                  <TableCell align="center">
-                    <Box sx={{ display: "flex", justifyContent: "center", gap:"0.3rem" }}>
-                      {/* EDIT BUTTON */}
-                      <Tooltip title="Edit Employee List">
-                        <IconButton
-                          sx={{
-                            color: "blue",
-                            "&:hover": { color: "darkblue" },
-                          }}
-                          onClick={() => handleEdit(row)}
-                          disabled={
-                            userRole === "viewer" && row.EmpId !== userEmpId
-                          }
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-
-                      {/* DELETE BUTTON - Hidden for Viewers */}
-                      {userRole !== "viewer" && (
-                        <Tooltip title="Delete Employee">
-                          <IconButton
-                            sx={{
-                              color: "red",
-                              "&:hover": { color: "darkred" },
-                            }}
-                            onClick={() => handleDelete(row._id)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 53 * emptyRows }}>
-                  <TableCell colSpan={9} />
-                </TableRow>
-              )}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TablePagination
-                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-                  colSpan={9}
-                  count={filteredData.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  slotProps={{
-                    select: {
-                      inputProps: {
-                        "aria-label": "rows per page",
-                      },
-                      native: true,
-                    },
-                  }}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                  ActionsComponent={TablePaginationActions}
-                />
-              </TableRow>
-            </TableFooter>
-          </Table>
-        </TableContainer>
-
-        {/* Edit Modal */}
-        {editModalOpen && (
-          <EditModal
-            open={editModalOpen}
-            handleClose={handleCloseModal}
-            employee={editData}
-            handleSave={handleSave}
-          />
-        )}
-        {/* add modal */}
-        <AddModal
-          open={addModalOpen}
-          handleClose={handleAddClose}
-          handleSave={handleAddSave}
-        />
-
-        {/* Upload Modal */}
-        <UploadModal
-          open={uploadModalOpen}
-          handleClose={handleUploadClose}
-          handleSave={handleUploadSave}
-        />
-      </Box>
-    </>
+    </Box>
   );
 };
 

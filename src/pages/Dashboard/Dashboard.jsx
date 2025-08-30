@@ -8,8 +8,8 @@ const Dashboard = () => {
     <div className="container mx-auto px-4 py-6 max-w-screen-xl">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Welcome to your team management dashboard</p>
+        <h1 className="text-2xl pb-3 font-bold text-gray-700">"Welcome to your Team Management Dashboard"</h1>
+        {/* <p className="text-gray-600 mt-2">Welcome to your team management dashboard</p> */}
       </div>
       
       {/* Info Cards */}

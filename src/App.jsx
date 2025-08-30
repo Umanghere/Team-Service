@@ -17,6 +17,9 @@ const App = () => {
     <Suspense fallback={<LoadingScreen />}>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/Team-Service-UI/login" element={<Login />} />
+        {/* Protected routes */}
         <Route
           path="/Team-Service-UI/*"
           element={
@@ -30,6 +33,9 @@ const App = () => {
           <Route path="wfo" element={<WFO />} />
           <Route path="training" element={<Training />} />
         </Route>
+
+        {/* Catch-all route - redirect to login */}
+        <Route path="*" element={<Login />} />
       </Routes>
     </Suspense>
   );

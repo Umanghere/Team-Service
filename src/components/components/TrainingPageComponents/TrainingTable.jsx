@@ -1,6 +1,5 @@
-import * as React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -29,10 +28,9 @@ import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
 import { useAuth } from "../../../context/AuthContext";
 import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -154,66 +152,53 @@ export default function TrainingTable() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editData, setEditData] = useState({});
-  const [copySuccess, setCopySuccess] = useState(false);
-  const [copyMessage, setCopyMessage] = useState("");
-  const { userRole, userEmpId, userName } = useAuth(); // Access user role, EmpId, and userName from context
+  const { userRole, userEmpId, userName } = useAuth();
+
+  const fetchTrainingData = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/trainingData`
+      );
+      setTrainingData(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Failed to fetch training data.");
+    }
+  }, []);
 
   useEffect(() => {
-    axios
-      // .get("https://jsonserver-2xm2.onrender.com/trainingData")
-      .get("https://teamservices-backend.onrender.com/trainingData")
-      .then((response) => {
-        setTrainingData(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data: ", error);
-      });
-  }, []);
+    fetchTrainingData();
+  }, [fetchTrainingData]);
 
   const handleEdit = (employeeData) => {
     setEditData(employeeData);
     setEditModalOpen(true);
   };
 
-  const handleSave = (updatedEmployee) => {
-    if (!updatedEmployee || !updatedEmployee._id) {
-      console.error("Updated employee is null or missing _id!");
-      alert("Something went wrong. Please refresh and try again.");
-      return;
-    }
-
-    axios
-      .put(
-        `https://teamservices-backend.onrender.com/trainingData/${updatedEmployee._id}`,
+  const handleSave = async (updatedEmployee) => {
+    try {
+      if (!updatedEmployee || !updatedEmployee._id) {
+        throw new Error("Updated employee data is missing ID.");
+      }
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/trainingData/${updatedEmployee._id}`,
         updatedEmployee
-      )
-      .then((response) => {
-        setTrainingData((prevData) =>
-          prevData.map((emp) =>
-            emp._id === updatedEmployee._id ? response.data : emp
-          )
-        );
-        handleCloseModal();
-        toast.success("Updated Successfully", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      })
-      .catch((error) => {
-        console.error("Error updating data: ", error);
-        alert("Failed to update employee. Please try again.");
-      });
+      );
+      setTrainingData((prevData) =>
+        prevData.map((emp) =>
+          emp._id === updatedEmployee._id ? response.data : emp
+        )
+      );
+      handleCloseModal();
+      toast.success("Updated Successfully");
+    } catch (error) {
+      console.error("Error updating data:", error);
+      toast.error("Failed to update employee. Please try again.");
+    }
   };
 
   const handleCloseModal = () => {
     setEditModalOpen(false);
-    // alert("Updated Successfully")
   };
 
   const handleAdd = () => {
@@ -222,34 +207,16 @@ export default function TrainingTable() {
 
   const handleAddSave = async (newEmployee) => {
     try {
-      const response = await fetch("https://teamservices-backend.onrender.com/trainingData", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newEmployee),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to add training data");
-      }
-
-      const addedTraining = await response.json();
-      setTrainingData((prevData) => [...prevData, addedTraining]); // Update frontend state
-      handleAddClose(); // Close modal after successful save
-      toast.success("Training Added Successfully", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/trainingData`,
+        newEmployee
+      );
+      setTrainingData((prevData) => [...prevData, response.data]);
+      handleAddClose();
+      toast.success("Training Added Successfully");
     } catch (error) {
       console.error("Error adding training data:", error);
-      alert("Failed to add training data. Please try again.");
+      toast.error("Failed to add training data. Please try again.");
     }
   };
 
@@ -282,7 +249,9 @@ export default function TrainingTable() {
       type: "application/octet-stream",
     });
     saveAs(blob, "training_data.xlsx");
+    toast.info("Downloading training data...");
   };
+
   const handleCopy = (row) => {
     const rowData = `
       Name: ${row.Name}
@@ -295,30 +264,24 @@ export default function TrainingTable() {
       Status: ${row.Status}
     `;
     navigator.clipboard.writeText(rowData).then(() => {
-      setCopyMessage(`Details of ${row.Name} copied to clipboard.`);
-      setCopySuccess(true);
+      toast.info(`Details of ${row.Name} copied to clipboard.`);
     });
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return "";
     return new Date(dateString).toLocaleDateString();
   };
 
   const filteredData = trainingData.filter(
     (row) =>
       (row.Name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (row.TrainingTitle || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      (row.TrainingType || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
+      (row.TrainingTitle || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (row.TrainingType || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (row.Mode || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (row.PlannedDate || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      (row.StartDate || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (row.EndDate || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (formatDate(row.PlannedDate) || "").includes(searchTerm.toLowerCase()) ||
+      (formatDate(row.StartDate) || "").includes(searchTerm.toLowerCase()) ||
+      (formatDate(row.EndDate) || "").includes(searchTerm.toLowerCase()) ||
       (row.Status || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -359,26 +322,23 @@ export default function TrainingTable() {
                 onChange={handleSearchChange}
               />
             </Search>
-
             <Box sx={{ display: "flex", alignItems: "center" }}>
               {(userRole === "admin" || userRole === "manager") && (
-                <>
-                  <Tooltip title="Add Employee">
-                    <IconButton
-                      onClick={handleAdd}
-                      sx={{
-                        backgroundColor: "blue",
-                        color: "white",
-                        "&:hover": { backgroundColor: "darkblue" },
-                        marginRight: "8px", // Space between Add and Download
-                      }}
-                    >
-                      <AddIcon />
-                    </IconButton>
-                  </Tooltip>
-                </>
+                <Tooltip title="Add Training">
+                  <IconButton
+                    onClick={handleAdd}
+                    sx={{
+                      backgroundColor: "blue",
+                      color: "white",
+                      "&:hover": { backgroundColor: "darkblue" },
+                      marginRight: "8px",
+                    }}
+                  >
+                    <AddIcon />
+                  </IconButton>
+                </Tooltip>
               )}
-              <Tooltip title="Download Employee List">
+              <Tooltip title="Download Training Data">
                 <IconButton
                   onClick={handleDownload}
                   sx={{
@@ -437,13 +397,11 @@ export default function TrainingTable() {
               ).map((row) => (
                 <TableRow key={row.id}>
                   <TableCell align="center">{row.Name}</TableCell>
-                  {/* <TableCell>{row.TrainingTitle}</TableCell> */}
                   <TableCell align="center">
                     {row.TrainingTitle.split(",").map((title, index) => (
                       <div key={index}>{title.trim()}</div>
                     ))}
                   </TableCell>
-
                   <TableCell align="center">{row.TrainingType}</TableCell>
                   <TableCell align="center">{row.Mode}</TableCell>
                   <TableCell align="center">
@@ -457,9 +415,14 @@ export default function TrainingTable() {
                   </TableCell>
                   <TableCell align="center">{row.Status}</TableCell>
                   <TableCell align="center">
-                    <Box sx={{ display: "flex", justifyContent: "center", gap:"0.3rem" }}>
-                      {/* EDIT BUTTON */}
-                      <Tooltip title="Edit Employee List">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: "0.3rem",
+                      }}
+                    >
+                      <Tooltip title="Edit Training Data">
                         <IconButton
                           sx={{
                             color: "blue",
@@ -467,16 +430,13 @@ export default function TrainingTable() {
                           }}
                           onClick={() => handleEdit(row)}
                           disabled={
-                            userRole === "viewer" &&
-                            !row.Name.includes(userName)
+                            userRole === "viewer" && !row.Name.includes(userName)
                           }
                         >
                           <EditIcon />
                         </IconButton>
                       </Tooltip>
-
-                      {/* DELETE BUTTON - Hidden for Viewers */}
-                      <Tooltip title="Copy Employee Details">
+                      <Tooltip title="Copy Training Details">
                         <IconButton
                           sx={{
                             color: "green",
@@ -521,36 +481,24 @@ export default function TrainingTable() {
             </TableFooter>
           </Table>
         </TableContainer>
-        {/* Edit Modal */}
-        {editModalOpen && (
-          <EditModal
-            open={editModalOpen}
-            handleClose={handleCloseModal}
-            employeeData={editData}
-            handleSave={handleSave}
-          />
-        )}
-        {/* add modal */}
-        <AddModal
-          open={addModalOpen}
-          handleClose={handleAddClose}
-          handleSave={handleAddSave}
-        />
-
-        <Snackbar
-          open={copySuccess}
-          autoHideDuration={3000}
-          onClose={() => setCopySuccess(false)}
-        >
-          <Alert
-            onClose={() => setCopySuccess(false)}
-            severity="success"
-            sx={{ width: "100%" }}
-          >
-            {copyMessage}
-          </Alert>
-        </Snackbar>
       </Box>
+      {editModalOpen && (
+        <EditModal
+          open={editModalOpen}
+          handleClose={handleCloseModal}
+          employeeData={editData}
+          handleSave={handleSave}
+        />
+      )}
+      <AddModal
+        open={addModalOpen}
+        handleClose={handleAddClose}
+        handleSave={handleAddSave}
+      />
     </>
   );
 }
+
+TrainingTable.propTypes = {
+  // Add prop types here if TrainingTable were a child component
+};
