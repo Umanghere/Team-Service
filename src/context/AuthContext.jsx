@@ -47,8 +47,8 @@ export const AuthProvider = ({ children }) => {
     setUserRole(role); // Set user role on login
 
     try {
-      // const response = await fetch("https://jsonserver-2xm2.onrender.com/users");
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users`);
+      const api = import.meta.env.VITE_API_BASE_URL;
+      const response = await fetch(`${api}/users`);
       const users = await response.json();
 
       // Find the user based on the email
